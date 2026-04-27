@@ -48,13 +48,15 @@ npm run preview
 
 ## Deployment
 
-This application is configured to deploy automatically to GitHub Pages.
+This application is configured to deploy automatically to GitHub Pages via a GitHub Actions workflow.
 
 ### Deploying to GitHub Pages
 
-1. Ensure your remote GitHub repository is set up properly.
-2. Run the deployment script:
+Deployment is completely automated. Any code pushed to the `main` branch will automatically trigger the GitHub Actions workflow (`.github/workflows/deploy.yml`), which builds the static assets and publishes them to GitHub Pages.
+
+To deploy a new version:
+1. Commit your changes.
+2. Push to the `main` branch:
    ```bash
-   npm run deploy
+   git push origin main
    ```
-This will automatically build the static assets into the `dist/` folder and push them to the `gh-pages` branch.
