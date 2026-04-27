@@ -641,3 +641,154 @@ input:checked + .toggle-label:before {
   border-radius: 0;
   border: 2px solid white;
 }
+
+/* Metronome Widget CSS */
+.metronome-wrapper {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.metronome-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.metronome-toggle:hover {
+  background-color: #222;
+  border-color: white;
+}
+
+.metronome-toggle.pulse {
+  border-color: var(--text-secondary);
+  animation: borderPulse 2s infinite;
+}
+
+@keyframes borderPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2); }
+  70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.metronome-panel {
+  width: 320px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.metronome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metronome-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.tick-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #333;
+  transition: background-color 0.1s;
+}
+
+.tick-indicator.active-accent {
+  background-color: #ffffff;
+  box-shadow: 0 0 10px #ffffff;
+}
+.tick-indicator.active-beat {
+  background-color: #aaaaaa;
+}
+.tick-indicator.active-sub {
+  background-color: #555555;
+}
+
+.metronome-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #000;
+  padding: 1.5rem;
+  border: 1px solid var(--panel-border);
+}
+
+.bpm-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.bpm-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.metronome-controls-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bpm-slider {
+  width: 100%;
+  accent-color: white;
+}
+
+.tap-btn {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.settings-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.settings-row .control-group {
+  flex: 1;
+}
+
+.settings-row select {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.play-btn {
+  width: 100%;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.play-btn span {
+  font-size: 2rem;
+}
+
+.play-btn.playing {
+  background-color: #ffffff;
+  color: #000000;
+}

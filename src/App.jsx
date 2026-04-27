@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ExploreMode from './components/ExploreMode';
 import PracticeMode from './components/PracticeMode';
 import SideNav from './components/SideNav';
+import MetronomeWidget from './components/MetronomeWidget';
 import './index.css';
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
       </main>
     </div>
   </div>
+  <MetronomeWidget />
 </div>
   );
 }
