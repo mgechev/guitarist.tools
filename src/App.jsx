@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ExploreMode from './components/ExploreMode';
 import PracticeMode from './components/PracticeMode';
+import SideNav from './components/SideNav';
 import './index.css';
 
 function App() {
@@ -10,8 +11,11 @@ function App() {
   const [shape, setShape] = useState('C');
 
   return (
-    <div className="app-container">
-      <header className="app-header glass-panel">
+    <div className="app-layout">
+      <SideNav />
+      <div className="app-main">
+        <div className="app-container">
+          <header className="app-header glass-panel">
         <div className="logo">
           <h1>CAGED <span>Master</span></h1>
         </div>
@@ -43,6 +47,8 @@ function App() {
         )}
       </main>
     </div>
+  </div>
+</div>
   );
 }
 

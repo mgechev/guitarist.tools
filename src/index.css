@@ -509,6 +509,104 @@ input:checked + .toggle-label:before {
   animation: fadeIn 0.4s ease forwards;
 }
 
+/* Sidebar Nav Layout */
+.app-layout {
+  display: flex;
+}
+
+.app-main {
+  flex: 1;
+  margin-left: 240px;
+  min-height: 100vh;
+}
+
+.sidenav {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 240px;
+  background-color: #0a0a0a;
+  border-right: 1px solid #222222;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.5rem 1rem;
+  z-index: 50;
+}
+
+.nav-profile {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-logo-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #222222;
+  border: 1px solid #333333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.nav-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
+  white-space: nowrap;
+}
+
+.nav-links {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.nav-item {
+  width: 100%;
+  color: #6b7280;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.nav-item:hover {
+  color: white;
+  background-color: #111111;
+  border-radius: 0.25rem;
+}
+
+.nav-item.active {
+  color: white;
+  background-color: #222222;
+  border-left: 3px solid white;
+  border-radius: 0.25rem;
+}
+
 @media (max-width: 768px) {
   .app-header {
     flex-direction: column;
@@ -518,7 +616,14 @@ input:checked + .toggle-label:before {
     flex-direction: column;
     align-items: stretch;
   }
+  .sidenav {
+    display: none;
+  }
+  .app-main {
+    margin-left: 0;
+  }
 }
+
 
 /* Chord Highlight */
 .chord-highlight {

@@ -9,10 +9,33 @@ const PracticeMode = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [showPentatonic, setShowPentatonic] = useState(true);
   const [showChord, setShowChord] = useState(false);
+  const [allowedKeys, setAllowedKeys] = useState(NOTES.map((_, i) => i));
+  const [allowedScales, setAllowedScales] = useState(['major', 'minor']);
+
+  const toggleKey = (keyIndex) => {
+    setAllowedKeys(prev => 
+      prev.includes(keyIndex) 
+        ? prev.filter(k => k !== keyIndex)
+        : [...prev, keyIndex]
+    );
+  };
+
+  const toggleScale = (scaleStr) => {
+    setAllowedScales(prev => 
+      prev.includes(scaleStr)
+        ? prev.filter(s => s !== scaleStr)
+        : [...prev, scaleStr]
+    );
+  };
 
   const pickRandom = () => {
-    const randomKey = Math.floor(Math.random() * 12);
-    const randomIsMinor = Math.random() > 0.5;
+    if (allowedKeys.length === 0 || allowedScales.length === 0) {
+      alert('Please select at least one key and one scale!');
+      return;
+    }
+    const randomKey = allowedKeys[Math.floor(Math.random() * allowedKeys.length)];
+    const randomScaleStr = allowedScales[Math.floor(Math.random() * allowedScales.length)];
+    const randomIsMinor = randomScaleStr === 'minor';
     const randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
     
     setChallenge({
@@ -25,12 +48,45 @@ const PracticeMode = () => {
 
   return (
     <div className="practice-mode">
-      <div className="controls glass-panel">
+      <div className="controls glass-panel" style={{flexDirection: 'column', alignItems: 'center'}}>
         <div className="practice-header">
           <h2>Practice Mode</h2>
-          <p>Test your knowledge of the CAGED system!</p>
+          <p style={{color: 'var(--text-secondary)'}}>Configure and test your knowledge of the CAGED system</p>
         </div>
         
+        <div className="practice-config" style={{width: '100%', maxWidth: '600px', marginBottom: '2rem', textAlign: 'left', borderTop: '1px solid var(--panel-border)', borderBottom: '1px solid var(--panel-border)', padding: '1.5rem 0'}}>
+          <div style={{display: 'flex', gap: '2rem', flexWrap: 'wrap'}}>
+            <div style={{flex: 1, minWidth: '150px'}}>
+              <label style={{display: 'block', marginBottom: '0.75rem', fontWeight: 600, color: 'white'}}>Scales</label>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'}}>
+                  <input type="checkbox" checked={allowedScales.includes('major')} onChange={() => toggleScale('major')} /> Major
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'}}>
+                  <input type="checkbox" checked={allowedScales.includes('minor')} onChange={() => toggleScale('minor')} /> Minor
+                </label>
+              </div>
+            </div>
+
+            <div style={{flex: 2, minWidth: '250px'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem'}}>
+                <label style={{fontWeight: 600, color: 'white'}}>Keys</label>
+                <div>
+                  <button onClick={() => setAllowedKeys(NOTES.map((_, i) => i))} style={{background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem', marginRight: '0.5rem', textDecoration: 'underline'}}>All</button>
+                  <button onClick={() => setAllowedKeys([])} style={{background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline'}}>None</button>
+                </div>
+              </div>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.75rem'}}>
+                {NOTES.map((note, i) => (
+                  <label key={i} style={{display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer', minWidth: '45px'}}>
+                    <input type="checkbox" checked={allowedKeys.includes(i)} onChange={() => toggleKey(i)} /> {note}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="practice-actions">
           <button className="primary-btn" onClick={pickRandom}>Pick Random Challenge</button>
           {challenge && (
