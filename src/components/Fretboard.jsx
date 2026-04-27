@@ -1,9 +1,10 @@
 import React from 'react';
-import { NOTES, STRING_ROOTS, getScale, getPentatonic, getShapeFretWindow } from '../utils/musicLogic';
+import { NOTES, STRING_ROOTS, getScale, getPentatonic, getShapeFretWindow, getChordTones } from '../utils/musicLogic';
 
-const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true }) => {
+const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord = false }) => {
   const scale = getScale(keyIndex, isMinor);
   const pentatonic = getPentatonic(scale, isMinor);
+  const chordTones = getChordTones(scale);
   const windowBounds = getShapeFretWindow(shape, keyIndex);
 
   const numFrets = 22;
@@ -29,6 +30,7 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true }) => {
                 const noteIndex = (STRING_ROOTS[sIndex] + f) % 12;
                 const isInScale = scale.includes(noteIndex);
                 const isPentatonic = pentatonic.includes(noteIndex);
+                const isChordTone = chordTones.includes(noteIndex);
                 const isRoot = noteIndex === keyIndex;
                 
                 const inBaseWindow = f >= windowBounds[0] && f <= windowBounds[1];
@@ -38,13 +40,15 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true }) => {
 
                 const showNote = isInScale && isInWindow;
                 const showPentatonicHighlight = showPentatonic && isPentatonic;
+                const showChordHighlight = showChord && isChordTone;
 
                 return (
                   <div key={`note-${sIndex}-${f}`} className={`fret-cell ${f === 0 ? 'open-string-cell' : ''}`}>
                     {showNote && (
                       <div className={`note-circle 
                         ${isRoot ? 'root-note' : 'scale-note'} 
-                        ${showPentatonicHighlight ? 'pentatonic-shadow' : ''}`}
+                        ${showPentatonicHighlight ? 'pentatonic-shadow' : ''}
+                        ${showChordHighlight ? 'chord-highlight' : ''}`}
                       >
                         {NOTES[noteIndex]}
                       </div>

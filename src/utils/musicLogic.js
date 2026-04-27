@@ -50,3 +50,9 @@ export function getShapeFretWindow(shape, keyIndex) {
   const baseFret = (SHAPE_BASES[shape] + keyIndex) % 12;
   return [baseFret, baseFret + 4];
 }
+
+// Get chord tones (1st, 3rd, 5th) from scale
+export function getChordTones(scale) {
+  return [scale[0], scale[2], scale[4]];
+}
+

@@ -8,6 +8,7 @@ const PracticeMode = () => {
   const [challenge, setChallenge] = useState(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [showPentatonic, setShowPentatonic] = useState(true);
+  const [showChord, setShowChord] = useState(false);
 
   const pickRandom = () => {
     const randomKey = Math.floor(Math.random() * 12);
@@ -53,17 +54,32 @@ const PracticeMode = () => {
           <div className="shape-info">
             <div className="legend-container">
               <p className="pentatonic-legend"><span className="pentatonic-shadow-demo"></span> Pentatonic notes highlighted</p>
+              <p className="pentatonic-legend" style={{marginTop: '0.5rem'}}><span className="chord-legend-demo"></span> Chord notes highlighted</p>
             </div>
-            <div className="control-group toggle-group horizontal-toggle">
-              <label>Highlight Pentatonic</label>
-              <div className="toggle-container">
-                <input 
-                  type="checkbox" 
-                  id="practice-pentatonic-toggle" 
-                  checked={showPentatonic}
-                  onChange={e => setShowPentatonic(e.target.checked)}
-                />
-                <label htmlFor="practice-pentatonic-toggle" className="toggle-label"></label>
+            <div style={{display: 'flex', gap: '2rem'}}>
+              <div className="control-group toggle-group horizontal-toggle">
+                <label>Highlight Pentatonic</label>
+                <div className="toggle-container">
+                  <input 
+                    type="checkbox" 
+                    id="practice-pentatonic-toggle" 
+                    checked={showPentatonic}
+                    onChange={e => setShowPentatonic(e.target.checked)}
+                  />
+                  <label htmlFor="practice-pentatonic-toggle" className="toggle-label"></label>
+                </div>
+              </div>
+              <div className="control-group toggle-group horizontal-toggle">
+                <label>Highlight Chord</label>
+                <div className="toggle-container">
+                  <input 
+                    type="checkbox" 
+                    id="practice-chord-toggle" 
+                    checked={showChord}
+                    onChange={e => setShowChord(e.target.checked)}
+                  />
+                  <label htmlFor="practice-chord-toggle" className="toggle-label"></label>
+                </div>
               </div>
             </div>
           </div>
@@ -72,6 +88,7 @@ const PracticeMode = () => {
             isMinor={challenge.isMinor} 
             shape={challenge.shape} 
             showPentatonic={showPentatonic}
+            showChord={showChord}
           />
         </div>
       )}

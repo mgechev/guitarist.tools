@@ -519,3 +519,20 @@ input:checked + .toggle-label:before {
     align-items: stretch;
   }
 }
+
+/* Chord Highlight */
+.chord-highlight {
+  border-radius: 0;
+  border: 2px solid white;
+}
+.root-note.chord-highlight {
+  background-color: var(--note-root-bg);
+  color: black;
+}
+.chord-legend-demo {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  border: 2px solid white;
+}
