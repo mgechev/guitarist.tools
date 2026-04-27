@@ -5,7 +5,7 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
   const scale = getScale(keyIndex, isMinor);
   const pentatonic = getPentatonic(scale, isMinor);
   const chordTones = getChordTones(scale);
-  const windowBounds = getShapeFretWindow(shape, keyIndex);
+  const windowBounds = getShapeFretWindow(shape, keyIndex, isMinor);
 
   const numFrets = 22;
   const strings = [0, 1, 2, 3, 4, 5]; // 1st (high e) to 6th (low E)
@@ -38,7 +38,17 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
                 const inOctaveDown = f >= windowBounds[0] - 12 && f <= windowBounds[1] - 12;
                 const isInWindow = inBaseWindow || inOctaveUp || inOctaveDown;
 
-                const showNote = isInScale && isInWindow;
+                // The C shape mathematically includes a redundant note on the G string (baseFret + 4)
+                // Guitarists practically play this exact pitch on the open/base B string instead,
+                // so we explicitly hide it on the G string to match standard playing visual patterns.
+                const isGString = sIndex === 2;
+                const isCShapeException = shape === 'C' && isGString && (
+                  f === windowBounds[0] + 4 || 
+                  f === windowBounds[0] + 16 || 
+                  f === windowBounds[0] - 8
+                );
+
+                const showNote = isInScale && isInWindow && !isCShapeException;
                 const showPentatonicHighlight = showPentatonic && isPentatonic;
                 const showChordHighlight = showChord && isChordTone;
 

@@ -7,7 +7,7 @@ const MINOR_INTERVALS = [2, 1, 2, 2, 1, 2, 2];
 export const SHAPE_BASES = {
   'C': 0,
   'A': 2,
-  'G': 5,
+  'G': 4,
   'E': 7,
   'D': 9
 };
@@ -46,8 +46,9 @@ export function getPentatonic(scale, isMinor) {
 }
 
 // Returns [minFret, maxFret] bounds for a given shape and key
-export function getShapeFretWindow(shape, keyIndex) {
-  const baseFret = (SHAPE_BASES[shape] + keyIndex) % 12;
+export function getShapeFretWindow(shape, keyIndex, isMinor) {
+  const effectiveKeyIndex = isMinor ? (keyIndex + 3) % 12 : keyIndex;
+  const baseFret = (SHAPE_BASES[shape] + effectiveKeyIndex) % 12;
   return [baseFret, baseFret + 4];
 }
 
