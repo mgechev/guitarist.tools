@@ -45,3 +45,16 @@ You can preview the production build locally by running:
 ```bash
 npm run preview
 ```
+
+## Deployment
+
+This application is configured to deploy automatically to GitHub Pages.
+
+### Deploying to GitHub Pages
+
+1. Ensure your remote GitHub repository is set up properly.
+2. Run the deployment script:
+   ```bash
+   npm run deploy
+   ```
+This will automatically build the static assets into the `dist/` folder and push them to the `gh-pages` branch.

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Fretboard from './Fretboard';
 import { NOTES } from '../utils/musicLogic';
+import Toggle from './shared/Toggle';
+import Button from './shared/Button';
 
 const SHAPES = ['C', 'A', 'G', 'E', 'D'];
 
@@ -58,13 +60,9 @@ const PracticeMode = () => {
           <div style={{display: 'flex', gap: '2rem', flexWrap: 'wrap'}}>
             <div style={{flex: 1, minWidth: '150px'}}>
               <label style={{display: 'block', marginBottom: '0.75rem', fontWeight: 600, color: 'var(--text-primary)'}}>Scales</label>
-              <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'}}>
-                  <input type="checkbox" checked={allowedScales.includes('major')} onChange={() => toggleScale('major')} /> Major
-                </label>
-                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'}}>
-                  <input type="checkbox" checked={allowedScales.includes('minor')} onChange={() => toggleScale('minor')} /> Minor
-                </label>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '0.75rem'}}>
+                <Toggle id="scale-major-toggle" checked={allowedScales.includes('major')} onChange={() => toggleScale('major')} label="Major" />
+                <Toggle id="scale-minor-toggle" checked={allowedScales.includes('minor')} onChange={() => toggleScale('minor')} label="Minor" />
               </div>
             </div>
 
@@ -76,11 +74,11 @@ const PracticeMode = () => {
                   <button onClick={() => setAllowedKeys([])} style={{background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline'}}>None</button>
                 </div>
               </div>
-              <div style={{display: 'flex', flexWrap: 'wrap', gap: '0.75rem'}}>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '1rem 0.75rem'}}>
                 {NOTES.map((note, i) => (
-                  <label key={i} style={{display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer', minWidth: '45px'}}>
-                    <input type="checkbox" checked={allowedKeys.includes(i)} onChange={() => toggleKey(i)} /> {note}
-                  </label>
+                  <div key={i} style={{minWidth: '60px'}}>
+                    <Toggle id={`key-${i}-toggle`} checked={allowedKeys.includes(i)} onChange={() => toggleKey(i)} label={note} scale={0.8} labelStyle={{fontSize: '0.9rem'}} />
+                  </div>
                 ))}
               </div>
             </div>
@@ -88,11 +86,11 @@ const PracticeMode = () => {
         </div>
 
         <div className="practice-actions">
-          <button className="primary-btn" onClick={pickRandom}>Pick Random Challenge</button>
+          <Button onClick={pickRandom}>Pick Random Challenge</Button>
           {challenge && (
-            <button className="secondary-btn" onClick={() => setShowAnswer(true)} disabled={showAnswer}>
+            <Button variant="secondary" onClick={() => setShowAnswer(true)} disabled={showAnswer}>
               Show Answer
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -115,27 +113,11 @@ const PracticeMode = () => {
             <div style={{display: 'flex', gap: '2rem'}}>
               <div className="control-group toggle-group horizontal-toggle">
                 <label>Highlight Pentatonic</label>
-                <div className="toggle-container">
-                  <input 
-                    type="checkbox" 
-                    id="practice-pentatonic-toggle" 
-                    checked={showPentatonic}
-                    onChange={e => setShowPentatonic(e.target.checked)}
-                  />
-                  <label htmlFor="practice-pentatonic-toggle" className="toggle-label"></label>
-                </div>
+                <Toggle id="practice-pentatonic-toggle" checked={showPentatonic} onChange={setShowPentatonic} />
               </div>
               <div className="control-group toggle-group horizontal-toggle">
                 <label>Highlight Chord</label>
-                <div className="toggle-container">
-                  <input 
-                    type="checkbox" 
-                    id="practice-chord-toggle" 
-                    checked={showChord}
-                    onChange={e => setShowChord(e.target.checked)}
-                  />
-                  <label htmlFor="practice-chord-toggle" className="toggle-label"></label>
-                </div>
+                <Toggle id="practice-chord-toggle" checked={showChord} onChange={setShowChord} />
               </div>
             </div>
           </div>

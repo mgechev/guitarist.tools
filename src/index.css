@@ -28,6 +28,7 @@
   --nav-active-bg: #222222;
   --nav-hover-bg: #111111;
   --invert-filter: none;
+  --select-chevron: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 :root.light-mode {
@@ -57,6 +58,7 @@
   --nav-active-bg: #f3f4f6;
   --nav-hover-bg: #f9fafb;
   --invert-filter: invert(1);
+  --select-chevron: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -118,18 +120,18 @@ h1, h2, h3, h4, h5, h6 {
 .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
 .control-group label { font-size: 0.875rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; }
 .control-group select {
-  appearance: none; background: #ffffff; border: 1px solid var(--panel-border);
-  color: #000000; padding: 0.75rem 3rem 0.75rem 1rem; border-radius: 0;
+  appearance: none; background: var(--panel-bg); border: 1px solid var(--panel-border);
+  color: var(--text-primary); padding: 0.75rem 3rem 0.75rem 1rem; border-radius: 0;
   font-size: 1rem; font-family: 'Inter', sans-serif; cursor: pointer; outline: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: var(--select-chevron);
   background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
   filter: none;
 }
 .control-group select:focus, .control-group select:hover { border-color: var(--text-primary); }
 
 select option {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: var(--panel-bg);
+  color: var(--text-primary);
 }
 
 .fretboard-wrapper { padding: 3rem 2rem; display: flex; flex-direction: column; gap: 2rem; }

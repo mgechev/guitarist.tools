@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { metronome } from '../utils/metronomeLogic';
+import Button from './shared/Button';
+import Select from './shared/Select';
 
 const MetronomeWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -103,36 +105,30 @@ const MetronomeWidget = () => {
               className="bpm-slider"
             />
             
-            <button className="secondary-btn tap-btn" onClick={handleTap}>
+            <Button variant="secondary" className="tap-btn" onClick={handleTap}>
               Tap Tempo
-            </button>
+            </Button>
 
             <div className="settings-row">
-              <div className="control-group">
-                <label>Time</label>
-                <select value={beatsPerBar} onChange={e => handleBeatsChange(parseInt(e.target.value))}>
-                  {[2, 3, 4, 5, 6, 7, 8].map(b => (
-                    <option key={b} value={b}>{b}/4</option>
-                  ))}
-                </select>
-              </div>
+              <Select label="Time" value={beatsPerBar} onChange={e => handleBeatsChange(parseInt(e.target.value))}>
+                {[2, 3, 4, 5, 6, 7, 8].map(b => (
+                  <option key={b} value={b}>{b}/4</option>
+                ))}
+              </Select>
 
-              <div className="control-group">
-                <label>Notes</label>
-                <select value={subdivision} onChange={e => handleSubdivisionChange(parseInt(e.target.value))}>
-                  <option value={1}>1/4</option>
-                  <option value={2}>1/8</option>
-                  <option value={3}>1/8 T</option>
-                  <option value={4}>1/16</option>
-                </select>
-              </div>
+              <Select label="Notes" value={subdivision} onChange={e => handleSubdivisionChange(parseInt(e.target.value))}>
+                <option value={1}>1/4</option>
+                <option value={2}>1/8</option>
+                <option value={3}>1/8 T</option>
+                <option value={4}>1/16</option>
+              </Select>
             </div>
 
-            <button className={`primary-btn play-btn ${isPlaying ? 'playing' : ''}`} onClick={togglePlay}>
+            <Button className={`play-btn ${isPlaying ? 'playing' : ''}`} onClick={togglePlay}>
               <span className="material-symbols-outlined">
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
