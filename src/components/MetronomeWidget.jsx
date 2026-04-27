@@ -88,7 +88,16 @@ const MetronomeWidget = () => {
         <div className="metronome-panel glass-panel fade-in">
           <div className="metronome-header">
             <h3>Metronome</h3>
-            <div className={`tick-indicator ${visualTick ? `active-${visualTick}` : ''}`}></div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+              <div className={`tick-indicator ${visualTick ? `active-${visualTick}` : ''}`}></div>
+              <button 
+                className="close-metronome-btn mobile-only" 
+                onClick={() => setIsOpen(false)}
+                style={{background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.25rem', display: 'flex'}}
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
           </div>
 
           <div className="metronome-display">

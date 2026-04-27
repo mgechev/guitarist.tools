@@ -110,7 +110,7 @@ const PracticeMode = () => {
               <p className="pentatonic-legend"><span className="pentatonic-shadow-demo"></span> Pentatonic notes highlighted</p>
               <p className="pentatonic-legend" style={{marginTop: '0.5rem'}}><span className="chord-legend-demo"></span> Chord notes highlighted</p>
             </div>
-            <div style={{display: 'flex', gap: '2rem'}}>
+            <div style={{display: 'flex', gap: '2rem', flexWrap: 'wrap'}}>
               <div className="control-group toggle-group horizontal-toggle">
                 <label>Highlight Pentatonic</label>
                 <Toggle id="practice-pentatonic-toggle" checked={showPentatonic} onChange={setShowPentatonic} />

@@ -231,11 +231,29 @@ input:checked + .toggle-label:before { transform: translateX(20px); background-c
 .nav-item.active { color: var(--text-primary); background-color: var(--nav-active-bg); border-left: 3px solid var(--text-primary); border-radius: 0.25rem; }
 
 @media (max-width: 768px) {
-  .app-header { flex-direction: column; gap: 1.5rem; }
-  .controls { flex-direction: column; align-items: stretch; }
+  .app-container { padding: 1rem; gap: 1rem; }
+  .app-header { padding: 1.5rem 1rem; flex-direction: column; gap: 1rem; text-align: center; }
+  .controls { flex-direction: column; align-items: stretch; padding: 1.5rem 1rem; gap: 1.5rem; }
+  .fretboard-wrapper { padding: 1.5rem 1rem; gap: 1.5rem; }
+  .shape-info { flex-direction: column; align-items: flex-start; gap: 1rem; }
   .sidenav { display: none; }
   .app-main { margin-left: 0; }
+  .practice-actions { flex-direction: column; }
+  
+  .metronome-panel {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    z-index: 1050;
+    padding: 2rem;
+    justify-content: center;
+    border: none;
+    border-radius: 0;
+    background-color: var(--bg-color);
+  }
+  .mobile-only { display: block !important; }
 }
+.mobile-only { display: none; }
 
 .chord-highlight { border-radius: 0; border: 2px solid var(--text-primary); }
 .root-note.chord-highlight { background-color: var(--note-root-bg); color: var(--bg-color); }
