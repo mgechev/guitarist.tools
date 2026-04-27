@@ -17,7 +17,8 @@
   --fret-dot-color: #222222;
   --note-root-bg: #ffffff;
   --note-scale-bg: #444444;
-  --note-text: #000000;
+  --note-text: #ffffff;
+  --note-border: #777777;
   
   --pentatonic-glow: 0 0 15px rgba(255, 255, 255, 0.8);
   
@@ -47,7 +48,8 @@
   --fret-dot-color: #e5e7eb;
   --note-root-bg: #111827;
   --note-scale-bg: #d1d5db;
-  --note-text: #ffffff;
+  --note-text: #111827;
+  --note-border: #9ca3af;
   
   --pentatonic-glow: 0 0 15px rgba(0, 0, 0, 0.4);
   
@@ -167,10 +169,10 @@ select option {
   width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
   font-size: 0.75rem; font-weight: 600; color: var(--note-text); transition: all 0.2s ease; animation: popIn 0.3s ease;
 }
-.scale-note { background: var(--note-scale-bg); border: 1px solid var(--text-secondary); }
+.scale-note { background: var(--note-scale-bg); border: 1px solid var(--note-border); }
 .root-note { background: var(--note-root-bg); color: var(--bg-color); width: 28px; height: 28px; }
 .pentatonic-shadow { box-shadow: var(--pentatonic-glow); border: 2px solid var(--text-primary); }
-.fret-numbers { display: flex; margin-top: 10px; padding-left: 20px; }
+.fret-numbers { display: flex; margin-top: 10px; padding-left: 20px; min-width: 1200px; }
 .fret-num { flex: 1; text-align: center; color: var(--text-secondary); font-size: 0.75rem; }
 .fret-num:first-child { flex: 0 0 20px; }
 
