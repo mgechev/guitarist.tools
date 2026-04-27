@@ -57,7 +57,7 @@ const PracticeMode = () => {
         <div className="practice-config" style={{width: '100%', maxWidth: '600px', marginBottom: '2rem', textAlign: 'left', borderTop: '1px solid var(--panel-border)', borderBottom: '1px solid var(--panel-border)', padding: '1.5rem 0'}}>
           <div style={{display: 'flex', gap: '2rem', flexWrap: 'wrap'}}>
             <div style={{flex: 1, minWidth: '150px'}}>
-              <label style={{display: 'block', marginBottom: '0.75rem', fontWeight: 600, color: 'white'}}>Scales</label>
+              <label style={{display: 'block', marginBottom: '0.75rem', fontWeight: 600, color: 'var(--text-primary)'}}>Scales</label>
               <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
                 <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'}}>
                   <input type="checkbox" checked={allowedScales.includes('major')} onChange={() => toggleScale('major')} /> Major
@@ -70,7 +70,7 @@ const PracticeMode = () => {
 
             <div style={{flex: 2, minWidth: '250px'}}>
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem'}}>
-                <label style={{fontWeight: 600, color: 'white'}}>Keys</label>
+                <label style={{fontWeight: 600, color: 'var(--text-primary)'}}>Keys</label>
                 <div>
                   <button onClick={() => setAllowedKeys(NOTES.map((_, i) => i))} style={{background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem', marginRight: '0.5rem', textDecoration: 'underline'}}>All</button>
                   <button onClick={() => setAllowedKeys([])} style={{background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline'}}>None</button>
