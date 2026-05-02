@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ExploreMode from './components/ExploreMode';
 import PracticeMode from './components/PracticeMode';
+import PlayMode from './components/PlayMode';
 import SideNav from './components/SideNav';
 import MetronomeWidget from './components/MetronomeWidget';
 import './index.css';
@@ -33,6 +34,12 @@ function App() {
           >
             Practice
           </button>
+          <button 
+            className={`tab-btn ${activeTab === 'play' ? 'active' : ''}`}
+            onClick={() => setActiveTab('play')}
+          >
+            Play
+          </button>
         </nav>
       </header>
 
@@ -43,8 +50,10 @@ function App() {
             isMinor={isMinor} setIsMinor={setIsMinor}
             shape={shape} setShape={setShape}
           />
-        ) : (
+        ) : activeTab === 'practice' ? (
           <PracticeMode />
+        ) : (
+          <PlayMode />
         )}
       </main>
     </div>

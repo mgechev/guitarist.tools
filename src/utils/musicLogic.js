@@ -22,6 +22,16 @@ export const STRING_ROOTS = [
   4   // 6th string (E)
 ];
 
+// Open strings MIDI note numbers (standard tuning)
+export const STRING_MIDI_ROOTS = [
+  64, // 1st string (E4)
+  59, // 2nd string (B3)
+  55, // 3rd string (G3)
+  50, // 4th string (D3)
+  45, // 5th string (A2)
+  40  // 6th string (E2)
+];
+
 // Get scale notes (indices)
 export function getScale(keyIndex, isMinor) {
   const intervals = isMinor ? MINOR_INTERVALS : MAJOR_INTERVALS;

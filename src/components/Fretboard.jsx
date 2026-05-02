@@ -1,7 +1,7 @@
 import React from 'react';
-import { NOTES, STRING_ROOTS, getScale, getPentatonic, getShapeFretWindow, getChordTones } from '../utils/musicLogic';
+import { NOTES, STRING_ROOTS, STRING_MIDI_ROOTS, getScale, getPentatonic, getShapeFretWindow, getChordTones } from '../utils/musicLogic';
 
-const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord = false }) => {
+const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord = false, activeMidiNote = null, isPlayMode = false }) => {
   const scale = getScale(keyIndex, isMinor);
   const pentatonic = getPentatonic(scale, isMinor);
   const chordTones = getChordTones(scale);
@@ -48,17 +48,22 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
                   f === windowBounds[0] - 8
                 );
 
-                const showNote = isInScale && isInWindow && !isCShapeException;
-                const showPentatonicHighlight = showPentatonic && isPentatonic;
-                const showChordHighlight = showChord && isChordTone;
+                // Absolute MIDI note for this exact string and fret
+                const absoluteMidiNote = STRING_MIDI_ROOTS[sIndex] + f;
+
+                const showNote = isPlayMode ? (activeMidiNote === absoluteMidiNote) : (isInScale && isInWindow && !isCShapeException);
+                const showPentatonicHighlight = !isPlayMode && showPentatonic && isPentatonic;
+                const showChordHighlight = !isPlayMode && showChord && isChordTone;
+                const isActivePitch = isPlayMode && (activeMidiNote === absoluteMidiNote);
 
                 return (
                   <div key={`note-${sIndex}-${f}`} className={`fret-cell ${f === 0 ? 'open-string-cell' : ''}`}>
                     {showNote && (
                       <div className={`note-circle 
-                        ${isRoot ? 'root-note' : 'scale-note'} 
+                        ${isRoot && !isPlayMode ? 'root-note' : 'scale-note'} 
                         ${showPentatonicHighlight ? 'pentatonic-shadow' : ''}
-                        ${showChordHighlight ? 'chord-highlight' : ''}`}
+                        ${showChordHighlight ? 'chord-highlight' : ''}
+                        ${isActivePitch ? 'active-pitch-highlight' : ''}`}
                       >
                         {NOTES[noteIndex]}
                       </div>
