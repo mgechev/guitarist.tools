@@ -11,6 +11,9 @@
   --accent-secondary: #ffffff;
   --accent-glow: transparent;
   
+  --surface-color: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.2);
+  
   --fretboard-bg: #000000;
   --string-color: #d1d5db;
   --fret-wire: #333333;
@@ -41,6 +44,9 @@
   --text-secondary: #4b5563;
   --accent-primary: #111827;
   --accent-secondary: #111827;
+  
+  --surface-color: rgba(0, 0, 0, 0.05);
+  --border-color: rgba(0, 0, 0, 0.15);
   
   --fretboard-bg: #f9fafb;
   --string-color: #4b5563;
