@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import styles from './SideNav.module.css';
 
 const SideNav = () => {
+  const location = useLocation();
+  const isCagedActive = location.pathname === '/explore' || location.pathname === '/practice';
+
   const [isLightMode, setIsLightMode] = useState(() => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: light)').matches;
+    if (typeof window !== 'undefined') {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
     }
     return false;
   });
@@ -31,25 +35,28 @@ const SideNav = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (isLightMode) {
+  const toggleTheme = () => {
+    setIsLightMode(!isLightMode);
+    if (!isLightMode) {
       document.documentElement.classList.add('light-mode');
+      localStorage.setItem('theme', 'light');
     } else {
       document.documentElement.classList.remove('light-mode');
+      localStorage.setItem('theme', 'dark');
     }
-  }, [isLightMode]);
+  };
 
   return (
-    <nav className="sidenav">
-      <div className="nav-profile">
-        <div className="nav-logo">
-          <span className="nav-logo-text">guitarist.tools</span>
+    <nav className={styles.sidenav}>
+      <div className={styles.navProfile}>
+        <div className={styles.navLogo}>
+          <span className={styles.navLogoText}>guitarist.tools</span>
         </div>
       </div>
-      <div className="nav-links" style={{flex: 1}}>
+      <div className={styles.navLinks} style={{flex: 1}}>
         <NavLink 
           to="/explore" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          className={`${styles.navItem} ${isCagedActive ? styles.active : ''}`}
           title="CAGED"
         >
           <span className="material-symbols-outlined">dashboard</span>
@@ -57,7 +64,7 @@ const SideNav = () => {
         </NavLink>
         <NavLink 
           to="/play" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
           title="Play"
         >
           <span className="material-symbols-outlined">music_note</span>
@@ -65,11 +72,11 @@ const SideNav = () => {
         </NavLink>
       </div>
       
-      <div className="nav-footer" style={{width: '100%', marginTop: 'auto'}}>
+      <div className="nav-footer" style={{width: '100%', borderTop: '1px solid var(--panel-border)', paddingTop: '1rem', marginTop: 'auto'}}>
         <button 
-          className="nav-item" 
-          onClick={() => setIsLightMode(!isLightMode)}
-          style={{background: 'none', border: 'none', cursor: 'pointer', width: '100%', padding: '0.75rem 1rem'}}
+          className={styles.navItem} 
+          onClick={toggleTheme}
+          title={isLightMode ? "Dark Mode" : "Light Mode"}
         >
           <span className="material-symbols-outlined">
             {isLightMode ? 'dark_mode' : 'light_mode'}

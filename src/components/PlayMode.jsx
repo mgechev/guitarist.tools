@@ -1,14 +1,15 @@
 import React from 'react';
 import Fretboard from './Fretboard';
+import styles from './PlayMode.module.css';
 
 const PlayMode = ({ activeMidiNote }) => {
   return (
-    <div className="play-mode">
-      <div className="controls-panel glass-panel" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div className={styles.playMode}>
+      <div className={`${styles.controlsPanel} glass-panel`} style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <h2 style={{ margin: 0 }}>Play Freely</h2>
       </div>
 
-      <div className="fretboard-wrapper glass-panel">
+      <div className={`${styles.fretboardWrapper} glass-panel`}>
         <Fretboard 
           keyIndex={0} 
           isMinor={false} 

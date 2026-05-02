@@ -1,0 +1,41 @@
+.metronomeWrapper { position: fixed; bottom: 2rem; right: 2rem; z-index: 100; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem; }
+.metronomeToggle {
+  width: 60px; height: 60px; border-radius: 50%; background-color: var(--panel-bg); border: 1px solid var(--panel-border);
+  color: var(--text-primary); display: flex; justify-content: center; align-items: center; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;
+}
+:global(.light-mode) .metronomeToggle { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+.metronomeToggle:hover { background-color: var(--nav-hover-bg); border-color: var(--text-primary); }
+.metronomeToggle.pulse { border-color: var(--text-secondary); animation: borderPulse 2s infinite; }
+@keyframes borderPulse { 0% { box-shadow: 0 0 0 0 rgba(150, 150, 150, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(150, 150, 150, 0); } 100% { box-shadow: 0 0 0 0 rgba(150, 150, 150, 0); } }
+
+.metronomePanel { width: 320px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+.metronomeHeader { display: flex; justify-content: space-between; align-items: center; }
+.metronomeHeader h3 { margin: 0; font-size: 1.25rem; }
+.tickIndicator { width: 12px; height: 12px; border-radius: 50%; background-color: var(--panel-border); transition: background-color 0.1s; }
+.tickIndicator.activeAccent { background-color: var(--text-primary); box-shadow: 0 0 10px var(--text-primary); }
+.tickIndicator.activeBeat { background-color: var(--text-secondary); }
+.tickIndicator.activeSub { background-color: var(--panel-border); border: 1px solid var(--text-secondary); }
+
+.metronomeDisplay { display: flex; flex-direction: column; align-items: center; background-color: var(--bg-color); padding: 1.5rem; border: 1px solid var(--panel-border); }
+.bpmText { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; line-height: 1; }
+.bpmLabel { font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 0.1em; text-transform: uppercase; }
+.metronomeControlsInner { display: flex; flex-direction: column; gap: 1.5rem; }
+.bpmSlider { width: 100%; accent-color: var(--text-primary); }
+.tapBtn { width: 100%; padding: 0.5rem; }
+.settingsRow { display: flex; gap: 1rem; }
+
+@media (max-width: 768px) {
+  .metronomePanel {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    max-width: 100vw;
+    z-index: 1050;
+    padding: 2rem 1.5rem;
+    justify-content: center;
+    border: none;
+    border-radius: 0;
+    background-color: var(--bg-color);
+  }
+}

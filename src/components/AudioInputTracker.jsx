@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PitchDetector } from 'pitchy';
 import { NOTES } from '../utils/musicLogic';
+import styles from './AudioInputTracker.module.css';
 
 const AudioInputTracker = ({ onPitchDetected }) => {
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [isTracking, setIsTracking] = useState(false);
+  const [isMonitoring, setIsMonitoring] = useState(false);
   
   const audioContextRef = useRef(null);
   const analyserNodeRef = useRef(null);
+  const monitorGainNodeRef = useRef(null);
   const streamRef = useRef(null);
   const requestRef = useRef(null);
 
@@ -50,8 +53,14 @@ const AudioInputTracker = ({ onPitchDetected }) => {
       analyserNode.fftSize = 2048;
       analyserNodeRef.current = analyserNode;
 
+      const monitorGainNode = audioContext.createGain();
+      monitorGainNode.gain.value = isMonitoring ? 1 : 0;
+      monitorGainNode.connect(audioContext.destination);
+      monitorGainNodeRef.current = monitorGainNode;
+
       const sourceNode = audioContext.createMediaStreamSource(stream);
       sourceNode.connect(analyserNode);
+      sourceNode.connect(monitorGainNode);
 
       const detector = PitchDetector.forFloat32Array(analyserNode.fftSize);
       const input = new Float32Array(detector.inputLength);
@@ -97,6 +106,14 @@ const AudioInputTracker = ({ onPitchDetected }) => {
     }
   };
 
+  // Update monitor volume smoothly when toggled
+  useEffect(() => {
+    if (monitorGainNodeRef.current && audioContextRef.current) {
+      const time = audioContextRef.current.currentTime;
+      monitorGainNodeRef.current.gain.setTargetAtTime(isMonitoring ? 1 : 0, time, 0.05);
+    }
+  }, [isMonitoring]);
+
   const stopTracking = () => {
     if (requestRef.current) {
       cancelAnimationFrame(requestRef.current);
@@ -107,17 +124,21 @@ const AudioInputTracker = ({ onPitchDetected }) => {
     if (audioContextRef.current) {
       audioContextRef.current.close();
     }
+    if (monitorGainNodeRef.current) {
+      monitorGainNodeRef.current.disconnect();
+      monitorGainNodeRef.current = null;
+    }
     setIsTracking(false);
     onPitchDetected(null);
   };
 
   return (
-    <div className="audio-tracker-controls">
+    <div className={styles.audioTrackerControls}>
       <select 
         value={selectedDeviceId} 
         onChange={(e) => setSelectedDeviceId(e.target.value)}
         disabled={isTracking}
-        className="device-select"
+        className={styles.deviceSelect}
       >
         {devices.map(device => (
           <option key={device.deviceId} value={device.deviceId}>
@@ -127,10 +148,23 @@ const AudioInputTracker = ({ onPitchDetected }) => {
       </select>
       
       {!isTracking ? (
-        <button onClick={startTracking} className="tracking-btn start">Connect</button>
+        <button onClick={startTracking} className={`${styles.trackingBtn} ${styles.start}`}>Connect</button>
       ) : (
-        <button onClick={stopTracking} className="tracking-btn stop">Disconnect</button>
+        <button onClick={stopTracking} className={`${styles.trackingBtn} ${styles.stop}`}>Disconnect</button>
       )}
+
+      <div className="toggle-group horizontal-toggle" style={{ marginTop: '0.5rem', width: '100%', justifyContent: 'space-between', padding: '0 5px' }}>
+        <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Monitor Audio</span>
+        <div className="toggle-container">
+          <input 
+            type="checkbox" 
+            id="monitor-toggle"
+            checked={isMonitoring} 
+            onChange={(e) => setIsMonitoring(e.target.checked)} 
+          />
+          <label htmlFor="monitor-toggle" className="toggle-label"></label>
+        </div>
+      </div>
     </div>
   );
 };

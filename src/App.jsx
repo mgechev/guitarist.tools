@@ -6,6 +6,7 @@ import PlayMode from './components/PlayMode';
 import SideNav from './components/SideNav';
 import ToolsMenuWidget from './components/ToolsMenuWidget';
 import './index.css';
+import styles from './App.module.css';
 
 function App() {
   const location = useLocation();
@@ -16,26 +17,26 @@ function App() {
   const [activePitchData, setActivePitchData] = useState(null);
 
   return (
-    <div className="app-layout">
+    <div className={styles.appLayout}>
       <SideNav />
-      <div className="app-main">
-        <div className="app-container">
-          <header className="app-header glass-panel">
-        <div className="logo">
+      <div className={styles.appMain}>
+        <div className={styles.appContainer}>
+          <header className={`${styles.appHeader} glass-panel`}>
+        <div className={styles.logo}>
           <h1>{isPlayMode ? 'Play' : 'CAGED'}</h1>
         </div>
         {/* Only show top tabs if not in Play mode */}
         {!isPlayMode && (
-          <nav className="tabs">
+          <nav className={styles.tabs}>
             <NavLink 
               to="/explore"
-              className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}
+              className={({ isActive }) => `${styles.tabBtn} ${isActive ? styles.active : ''}`}
             >
               Explore
             </NavLink>
             <NavLink 
               to="/practice"
-              className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}
+              className={({ isActive }) => `${styles.tabBtn} ${isActive ? styles.active : ''}`}
             >
               Practice
             </NavLink>
@@ -43,7 +44,7 @@ function App() {
         )}
       </header>
 
-      <main className="main-content">
+      <main className={styles.mainContent}>
         <Routes>
           <Route path="/explore" element={
             <ExploreMode 

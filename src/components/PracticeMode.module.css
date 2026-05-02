@@ -1,0 +1,26 @@
+.practiceMode { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease; width: 100%; }
+.practiceHeader { text-align: center; width: 100%; margin-bottom: 1rem; }
+.practiceHeader h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+.practiceActions { display: flex; gap: 1rem; justify-content: center; width: 100%; }
+
+.primaryBtn, .secondaryBtn {
+  padding: 0.75rem 1.5rem; border-radius: 0; font-size: 0.875rem; font-weight: 500;
+  font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase;
+}
+.primaryBtn { background: transparent; color: var(--text-primary); border: 1px solid var(--text-primary); }
+.primaryBtn:hover { background: var(--text-primary); color: var(--bg-color); }
+.secondaryBtn { background: var(--panel-bg); color: var(--text-secondary); border: 1px solid var(--panel-border); }
+.secondaryBtn:hover:not(:disabled) { border-color: var(--text-primary); color: var(--text-primary); }
+.secondaryBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.challengeDisplay { padding: 2rem; text-align: center; }
+.challengeText { font-size: 1.5rem; font-weight: 400; }
+.highlightText { color: var(--text-primary); font-weight: 600; border-bottom: 1px solid var(--text-primary); }
+.emptyState { padding: 4rem; text-align: center; color: var(--text-secondary); font-size: 1.1rem; }
+
+.fretboardWrapper { max-width: 100%; overflow: hidden; padding: 2rem; border-radius: 12px; }
+
+@media (max-width: 768px) {
+  .practiceActions { flex-direction: column; }
+  .fretboardWrapper { padding: 1.5rem 1rem; gap: 1.5rem; box-sizing: border-box; }
+}

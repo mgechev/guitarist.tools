@@ -3,6 +3,7 @@ import Fretboard from './Fretboard';
 import { NOTES } from '../utils/musicLogic';
 import Toggle from './shared/Toggle';
 import Button from './shared/Button';
+import styles from './PracticeMode.module.css';
 
 const SHAPES = ['C', 'A', 'G', 'E', 'D'];
 
@@ -49,14 +50,14 @@ const PracticeMode = () => {
   };
 
   return (
-    <div className="practice-mode">
-      <div className="controls glass-panel" style={{flexDirection: 'column', alignItems: 'center'}}>
-        <div className="practice-header">
+    <div className={styles.practiceMode}>
+      <div className={`glass-panel`} style={{flexDirection: 'column', alignItems: 'center', display: 'flex', padding: '2rem'}}>
+        <div className={styles.practiceHeader}>
           <h2>Practice Mode</h2>
           <p style={{color: 'var(--text-secondary)'}}>Configure and test your knowledge of the CAGED system</p>
         </div>
         
-        <div className="practice-config" style={{width: '100%', maxWidth: '600px', marginBottom: '2rem', textAlign: 'left', borderTop: '1px solid var(--panel-border)', borderBottom: '1px solid var(--panel-border)', padding: '1.5rem 0'}}>
+        <div style={{width: '100%', maxWidth: '600px', marginBottom: '2rem', textAlign: 'left', borderTop: '1px solid var(--panel-border)', borderBottom: '1px solid var(--panel-border)', padding: '1.5rem 0'}}>
           <div style={{display: 'flex', gap: '2rem', flexWrap: 'wrap'}}>
             <div style={{flex: 1, minWidth: '150px'}}>
               <label style={{display: 'block', marginBottom: '0.75rem', fontWeight: 600, color: 'var(--text-primary)'}}>Scales</label>
@@ -85,7 +86,7 @@ const PracticeMode = () => {
           </div>
         </div>
 
-        <div className="practice-actions">
+        <div className={styles.practiceActions}>
           <Button onClick={pickRandom}>Pick Random Challenge</Button>
           {challenge && (
             <Button variant="secondary" onClick={() => setShowAnswer(true)} disabled={showAnswer}>
@@ -96,27 +97,27 @@ const PracticeMode = () => {
       </div>
 
       {challenge && (
-        <div className="challenge-display glass-panel fade-in">
-          <h3 className="challenge-text">
-            Find the <span className="highlight-text">{NOTES[challenge.keyIndex]} {challenge.isMinor ? 'Minor' : 'Major'}</span> scale in the <span className="highlight-text">{challenge.shape} Shape</span>
+        <div className={`${styles.challengeDisplay} glass-panel fade-in`}>
+          <h3 className={styles.challengeText}>
+            Find the <span className={styles.highlightText}>{NOTES[challenge.keyIndex]} {challenge.isMinor ? 'Minor' : 'Major'}</span> scale in the <span className={styles.highlightText}>{challenge.shape} Shape</span>
           </h3>
         </div>
       )}
 
       {challenge && showAnswer && (
-        <div className="fretboard-wrapper glass-panel reveal-animation">
-          <div className="shape-info">
-            <div className="legend-container">
-              <p className="pentatonic-legend"><span className="pentatonic-shadow-demo"></span> Pentatonic notes highlighted</p>
-              <p className="pentatonic-legend" style={{marginTop: '0.5rem'}}><span className="chord-legend-demo"></span> Chord notes highlighted</p>
+        <div className={`${styles.fretboardWrapper} glass-panel reveal-animation`}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem'}}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+              <p style={{fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem'}}><span style={{display: 'inline-block', width: '16px', height: '16px', borderRadius: '50%', background: 'var(--note-scale-bg)', boxShadow: 'var(--pentatonic-glow)', border: '2px solid var(--text-primary)'}}></span> Pentatonic notes highlighted</p>
+              <p style={{fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem'}}><span style={{display: 'inline-block', width: '16px', height: '16px', border: '2px solid var(--text-primary)'}}></span> Chord notes highlighted</p>
             </div>
             <div style={{display: 'flex', gap: '2rem', flexWrap: 'wrap'}}>
-              <div className="control-group toggle-group horizontal-toggle">
-                <label>Highlight Pentatonic</label>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+                <label style={{fontSize: '0.875rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 500}}>Highlight Pentatonic</label>
                 <Toggle id="practice-pentatonic-toggle" checked={showPentatonic} onChange={setShowPentatonic} />
               </div>
-              <div className="control-group toggle-group horizontal-toggle">
-                <label>Highlight Chord</label>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+                <label style={{fontSize: '0.875rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 500}}>Highlight Chord</label>
                 <Toggle id="practice-chord-toggle" checked={showChord} onChange={setShowChord} />
               </div>
             </div>
@@ -132,7 +133,7 @@ const PracticeMode = () => {
       )}
       
       {!challenge && (
-        <div className="empty-state glass-panel">
+        <div className={`${styles.emptyState} glass-panel`}>
           <p>Click "Pick Random Challenge" to begin.</p>
         </div>
       )}

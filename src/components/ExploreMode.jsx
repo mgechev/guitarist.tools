@@ -3,14 +3,15 @@ import Fretboard from './Fretboard';
 import { NOTES } from '../utils/musicLogic';
 import Toggle from './shared/Toggle';
 import Select from './shared/Select';
+import styles from './ExploreMode.module.css';
 
 const ExploreMode = ({ keyIndex, setKeyIndex, isMinor, setIsMinor, shape, setShape }) => {
   const [showPentatonic, setShowPentatonic] = React.useState(true);
   const [showChord, setShowChord] = React.useState(false);
 
   return (
-    <div className="explore-mode">
-      <div className="controls glass-panel">
+    <div className={styles.exploreMode}>
+      <div className={`${styles.controls} glass-panel`}>
         <Select label="Key" value={keyIndex} onChange={e => setKeyIndex(parseInt(e.target.value))}>
           {NOTES.map((n, i) => <option key={n} value={i}>{n}</option>)}
         </Select>
@@ -28,23 +29,23 @@ const ExploreMode = ({ keyIndex, setKeyIndex, isMinor, setIsMinor, shape, setSha
           <option value="D">D Shape</option>
         </Select>
         
-        <div className="control-group toggle-group">
+        <div className={`${styles.controlGroup} ${styles.toggleGroup}`}>
           <label>Highlight Pentatonic</label>
           <Toggle id="pentatonic-toggle" checked={showPentatonic} onChange={setShowPentatonic} />
         </div>
         
-        <div className="control-group toggle-group">
+        <div className={`${styles.controlGroup} ${styles.toggleGroup}`}>
           <label>Highlight Chord</label>
           <Toggle id="chord-toggle" checked={showChord} onChange={setShowChord} />
         </div>
       </div>
       
-      <div className="fretboard-wrapper glass-panel">
-        <div className="shape-info">
+      <div className={`${styles.fretboardWrapper} glass-panel`}>
+        <div className={styles.shapeInfo}>
           <h2>{NOTES[keyIndex]} {isMinor ? 'Minor' : 'Major'} - {shape} Shape</h2>
           <div>
-            <p className="pentatonic-legend"><span className="pentatonic-shadow-demo"></span> Pentatonic notes highlighted</p>
-            <p className="pentatonic-legend" style={{marginTop: '0.5rem'}}><span className="chord-legend-demo"></span> Chord notes highlighted</p>
+            <p className={styles.pentatonicLegend}><span className={styles.pentatonicShadowDemo}></span> Pentatonic notes highlighted</p>
+            <p className={styles.pentatonicLegend} style={{marginTop: '0.5rem'}}><span className={styles.chordLegendDemo}></span> Chord notes highlighted</p>
           </div>
         </div>
         <Fretboard keyIndex={keyIndex} isMinor={isMinor} shape={shape} showPentatonic={showPentatonic} showChord={showChord} />

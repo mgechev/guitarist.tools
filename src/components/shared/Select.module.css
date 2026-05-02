@@ -1,0 +1,11 @@
+.controlGroup { display: flex; flex-direction: column; gap: 0.5rem; }
+.controlGroup label { font-size: 0.875rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; }
+.controlGroup select {
+  appearance: none; background: var(--panel-bg); border: 1px solid var(--panel-border);
+  color: var(--text-primary); padding: 0.75rem 3rem 0.75rem 1rem; border-radius: 0;
+  font-size: 1rem; font-family: 'Inter', sans-serif; cursor: pointer; outline: none;
+  background-image: var(--select-chevron);
+  background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
+  filter: none;
+}
+.controlGroup select:focus, .controlGroup select:hover { border-color: var(--text-primary); }

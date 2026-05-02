@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { metronome } from '../utils/metronomeLogic';
 import Button from './shared/Button';
 import Select from './shared/Select';
+import styles from './MetronomeWidget.module.css';
 
 const MetronomeWidget = ({ isOpen, onClose }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -82,15 +83,14 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
   }, []);
 
   return (
-    <div className="metronome-wrapper">
+    <div className={styles.metronomeWrapper}>
       {isOpen && (
-        <div className="metronome-panel glass-panel fade-in">
-          <div className="metronome-header">
+        <div className={`${styles.metronomePanel} glass-panel fade-in`}>
+          <div className={styles.metronomeHeader}>
             <h3>Metronome</h3>
             <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
-              <div className={`tick-indicator ${visualTick ? `active-${visualTick}` : ''}`}></div>
+              <div className={`${styles.tickIndicator} ${visualTick ? styles['active' + visualTick.charAt(0).toUpperCase() + visualTick.slice(1)] : ''}`}></div>
               <button 
-                className="close-metronome-btn" 
                 onClick={onClose}
                 style={{background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.25rem', display: 'flex'}}
               >
@@ -99,25 +99,25 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="metronome-display">
-            <span className="bpm-text">{tempo}</span>
-            <span className="bpm-label">BPM</span>
+          <div className={styles.metronomeDisplay}>
+            <span className={styles.bpmText}>{tempo}</span>
+            <span className={styles.bpmLabel}>BPM</span>
           </div>
 
-          <div className="metronome-controls-inner">
+          <div className={styles.metronomeControlsInner}>
             <input 
               type="range" 
               min="30" max="300" 
               value={tempo} 
               onChange={(e) => handleTempoChange(parseInt(e.target.value))}
-              className="bpm-slider"
+              className={styles.bpmSlider}
             />
             
-            <Button variant="secondary" className="tap-btn" onClick={handleTap}>
+            <Button variant="secondary" className={styles.tapBtn} onClick={handleTap}>
               Tap Tempo
             </Button>
 
-            <div className="settings-row">
+            <div className={styles.settingsRow}>
               <Select label="Time" value={beatsPerBar} onChange={e => handleBeatsChange(parseInt(e.target.value))}>
                 {[2, 3, 4, 5, 6, 7, 8].map(b => (
                   <option key={b} value={b}>{b}/4</option>
@@ -132,8 +132,8 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
               </Select>
             </div>
 
-            <Button className={`play-btn ${isPlaying ? 'playing' : ''}`} onClick={togglePlay}>
-              <span className="material-symbols-outlined">
+            <Button variant={isPlaying ? 'secondary' : 'primary'} onClick={togglePlay}>
+              <span className="material-symbols-outlined" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
             </Button>

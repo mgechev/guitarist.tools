@@ -1,0 +1,20 @@
+.sidenav {
+  position: fixed; left: 0; top: 0; height: 100vh; width: 240px; background-color: var(--sidenav-bg);
+  border-right: 1px solid var(--panel-border); display: flex; flex-direction: column;
+  align-items: flex-start; padding: 1.5rem 1rem; z-index: 50; transition: background-color 0.3s;
+}
+.navProfile { margin-bottom: 2rem; width: 100%; }
+.navLogo { display: flex; align-items: center; gap: 0.75rem; }
+.navLogoText { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: var(--text-primary); white-space: nowrap; }
+.navLinks { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+.navItem {
+  width: 100%; color: var(--text-secondary); padding: 0.75rem 1rem; transition: all 0.3s;
+  text-decoration: none; display: flex; justify-content: flex-start; align-items: center;
+  gap: 0.75rem; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.95rem; cursor: pointer; border: none; background: transparent; text-align: left;
+}
+.navItem:hover { color: var(--text-primary); background-color: var(--nav-hover-bg); border-radius: 0.25rem; }
+.navItem.active { color: var(--text-primary); background-color: var(--nav-active-bg); border-left: 3px solid var(--text-primary); border-radius: 0.25rem; }
+
+@media (max-width: 768px) {
+  .sidenav { display: none; }
+}

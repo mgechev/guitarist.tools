@@ -2,92 +2,87 @@ import React, { useState } from 'react';
 import MetronomeWidget from './MetronomeWidget';
 import TunerPanel from './TunerPanel';
 import AudioInputTracker from './AudioInputTracker';
+import styles from './ToolsMenuWidget.module.css';
 
 const ToolsMenuWidget = ({ activePitchData, onPitchDetected }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activePanel, setActivePanel] = useState(null); // 'metronome', 'tuner', 'connect'
+  const [activeTool, setActiveTool] = useState(null); // 'metronome', 'tuner', 'connect', null
 
-  const togglePanel = (panelName) => {
-    if (activePanel === panelName) {
-      setActivePanel(null);
-    } else {
-      setActivePanel(panelName);
-    }
-    setIsMenuOpen(false); // Close the menu when a panel is opened
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const openTool = (tool) => {
+    setActiveTool(activeTool === tool ? null : tool);
+    setIsMenuOpen(false); // Close menu when opening a tool
   };
 
   return (
-    <div className="tools-widget-container">
-      {/* Panels */}
+    <>
+      <div className={styles.toolsWidgetContainer}>
+        {/* The pop-out menu list */}
+        <div className={`${styles.toolsMenu} ${isMenuOpen ? styles.open : ''}`}>
+          <button className={styles.toolBtn} onClick={() => openTool('connect')}>
+            <span className={`material-symbols-outlined ${styles.materialIcon}`}>cable</span>
+            <span>Connect Guitar</span>
+          </button>
+          
+          <button className={styles.toolBtn} onClick={() => openTool('tuner')}>
+            <span className={`material-symbols-outlined ${styles.materialIcon}`}>tune</span>
+            <span>Tuner</span>
+          </button>
+          
+          <button className={styles.toolBtn} onClick={() => openTool('metronome')}>
+            <span className={`material-symbols-outlined ${styles.materialIcon}`}>timer</span>
+            <span>Metronome</span>
+          </button>
+        </div>
+
+        {/* Main Floating Action Button */}
+        <button 
+          className={`${styles.toolsToggleBtn} ${isMenuOpen ? styles.active : ''}`}
+          onClick={toggleMenu}
+          title="Tools"
+        >
+          <span className="material-symbols-outlined" style={{fontSize: '2rem'}}>
+            add
+          </span>
+        </button>
+      </div>
+
+      {/* Render the active tool panels based on state */}
       <MetronomeWidget 
-        isOpen={activePanel === 'metronome'} 
-        onClose={() => setActivePanel(null)} 
+        isOpen={activeTool === 'metronome'} 
+        onClose={() => setActiveTool(null)} 
       />
       
-      {activePanel === 'tuner' && (
-        <TunerPanel 
-          activePitchData={activePitchData} 
-          onClose={() => setActivePanel(null)} 
-        />
+      {activeTool === 'tuner' && (
+        <div className={styles.toolsWidgetContainer} style={{ bottom: '90px' }}>
+          <TunerPanel 
+            activePitchData={activePitchData} 
+            onClose={() => setActiveTool(null)} 
+          />
+        </div>
       )}
 
-      {activePanel === 'connect' && (
-        <div className="connect-panel glass-panel fade-in">
-          <div className="connect-header">
-            <h3>Connect Instrument</h3>
-            <button 
-              className="close-panel-btn" 
-              onClick={() => setActivePanel(null)}
-              title="Close"
-            >
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <div style={{ marginTop: '1rem' }}>
+      {activeTool === 'connect' && (
+        <div className={styles.toolsWidgetContainer} style={{ bottom: '90px' }}>
+          <div className="glass-panel fade-in" style={{ padding: '1.5rem', width: '300px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Connect Guitar</h3>
+              <button 
+                onClick={() => setActiveTool(null)}
+                style={{background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem', display: 'flex'}}
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+              Connect your audio interface and select it below to enable pitch detection for the tuner and fretboard.
+            </p>
             <AudioInputTracker onPitchDetected={onPitchDetected} />
           </div>
         </div>
       )}
-
-      {/* Speed Dial Menu */}
-      <div className={`tools-menu ${isMenuOpen ? 'open' : ''}`}>
-        <button 
-          className="tool-btn" 
-          onClick={() => togglePanel('metronome')}
-          title="Metronome"
-        >
-          <span className="material-symbols-outlined">timer</span>
-          <span className="tool-label">Metronome</span>
-        </button>
-        <button 
-          className="tool-btn" 
-          onClick={() => togglePanel('tuner')}
-          title="Tuner"
-        >
-          <span className="material-symbols-outlined">tune</span>
-          <span className="tool-label">Tuner</span>
-        </button>
-        <button 
-          className="tool-btn" 
-          onClick={() => togglePanel('connect')}
-          title="Connect"
-        >
-          <span className="material-symbols-outlined">settings_input_component</span>
-          <span className="tool-label">Connect</span>
-        </button>
-      </div>
-
-      {/* Main Toggle Button */}
-      <button 
-        className={`tools-toggle-btn ${isMenuOpen ? 'active' : ''}`}
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        title="Tools"
-      >
-        <span className="material-symbols-outlined">
-          {isMenuOpen ? 'close' : 'build'}
-        </span>
-      </button>
-    </div>
+    </>
   );
 };
 

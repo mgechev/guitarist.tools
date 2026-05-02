@@ -1,7 +1,8 @@
 import React from 'react';
+import styles from './Button.module.css';
 
 const Button = ({ variant = 'primary', className = '', children, ...props }) => {
-  const btnClass = variant === 'primary' ? 'primary-btn' : 'secondary-btn';
+  const btnClass = variant === 'primary' ? styles.primaryBtn : styles.secondaryBtn;
   return (
     <button className={`${btnClass} ${className}`.trim()} {...props}>
       {children}

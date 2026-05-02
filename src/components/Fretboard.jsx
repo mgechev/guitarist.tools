@@ -1,5 +1,6 @@
 import React from 'react';
 import { NOTES, STRING_ROOTS, STRING_MIDI_ROOTS, getScale, getPentatonic, getShapeFretWindow, getChordTones } from '../utils/musicLogic';
+import styles from './Fretboard.module.css';
 
 const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord = false, activeMidiNote = null, isPlayMode = false }) => {
   const scale = getScale(keyIndex, isMinor);
@@ -12,20 +13,20 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
   const frets = Array.from({ length: numFrets + 1 }, (_, i) => i);
 
   return (
-    <div className="fretboard-container">
-      <div className="fretboard">
-        <div className="frets-bg">
+    <div className={styles.fretboardContainer}>
+      <div className={styles.fretboard}>
+        <div className={styles.fretsBg}>
           {frets.map(f => (
-            <div key={`fret-bg-${f}`} className={`fret-bg ${f === 0 ? 'nut' : ''}`}>
-              {f > 0 && [3, 5, 7, 9, 15, 17, 19, 21].includes(f) && <div className="dot single-dot"></div>}
-              {f > 0 && f === 12 && <div className="dot double-dot"></div>}
+            <div key={`fret-bg-${f}`} className={`${styles.fretBg} ${f === 0 ? styles.nut : ''}`}>
+              {f > 0 && [3, 5, 7, 9, 15, 17, 19, 21].includes(f) && <div className={`${styles.dot} single-dot`}></div>}
+              {f > 0 && f === 12 && <div className={`${styles.dot} ${styles.doubleDot}`}></div>}
             </div>
           ))}
         </div>
         
-        <div className="strings-container">
+        <div className={styles.stringsContainer}>
           {strings.map(sIndex => (
-            <div key={`string-${sIndex}`} className="guitar-string">
+            <div key={`string-${sIndex}`} className={styles.guitarString}>
               {frets.map(f => {
                 const noteIndex = (STRING_ROOTS[sIndex] + f) % 12;
                 const isInScale = scale.includes(noteIndex);
@@ -38,9 +39,6 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
                 const inOctaveDown = f >= windowBounds[0] - 12 && f <= windowBounds[1] - 12;
                 const isInWindow = inBaseWindow || inOctaveUp || inOctaveDown;
 
-                // The C shape mathematically includes a redundant note on the G string (baseFret + 4)
-                // Guitarists practically play this exact pitch on the open/base B string instead,
-                // so we explicitly hide it on the G string to match standard playing visual patterns.
                 const isGString = sIndex === 2;
                 const isCShapeException = shape === 'C' && isGString && (
                   f === windowBounds[0] + 4 || 
@@ -48,7 +46,6 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
                   f === windowBounds[0] - 8
                 );
 
-                // Absolute MIDI note for this exact string and fret
                 const absoluteMidiNote = STRING_MIDI_ROOTS[sIndex] + f;
 
                 const showNote = isPlayMode ? (activeMidiNote === absoluteMidiNote) : (isInScale && isInWindow && !isCShapeException);
@@ -57,13 +54,13 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
                 const isActivePitch = isPlayMode && (activeMidiNote === absoluteMidiNote);
 
                 return (
-                  <div key={`note-${sIndex}-${f}`} className={`fret-cell ${f === 0 ? 'open-string-cell' : ''}`}>
+                  <div key={`note-${sIndex}-${f}`} className={`${styles.fretCell} ${f === 0 ? styles.openStringCell : ''}`}>
                     {showNote && (
-                      <div className={`note-circle 
-                        ${isRoot && !isPlayMode ? 'root-note' : 'scale-note'} 
-                        ${showPentatonicHighlight ? 'pentatonic-shadow' : ''}
-                        ${showChordHighlight ? 'chord-highlight' : ''}
-                        ${isActivePitch ? 'active-pitch-highlight' : ''}`}
+                      <div className={`${styles.noteCircle} 
+                        ${isRoot && !isPlayMode ? styles.rootNote : styles.scaleNote} 
+                        ${showPentatonicHighlight ? styles.pentatonicShadow : ''}
+                        ${showChordHighlight ? styles.chordHighlight : ''}
+                        ${isActivePitch ? styles.activePitchHighlight : ''}`}
                       >
                         {NOTES[noteIndex]}
                       </div>
@@ -75,9 +72,9 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
           ))}
         </div>
       </div>
-      <div className="fret-numbers">
+      <div className={styles.fretNumbers}>
         {frets.map(f => (
-          <div key={`num-${f}`} className="fret-num">{f}</div>
+          <div key={`num-${f}`} className={styles.fretNum}>{f}</div>
         ))}
       </div>
     </div>

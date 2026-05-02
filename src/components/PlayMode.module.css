@@ -1,0 +1,10 @@
+.playMode { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease; width: 100%; }
+
+.controlsPanel { padding: 2rem; }
+
+.fretboardWrapper { max-width: 100%; overflow: hidden; padding: 2rem; border-radius: 12px; }
+
+@media (max-width: 768px) {
+  .controlsPanel { padding: 1.5rem 1rem; }
+  .fretboardWrapper { padding: 1.5rem 1rem; gap: 1.5rem; box-sizing: border-box; }
+}

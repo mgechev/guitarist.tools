@@ -1,5 +1,6 @@
 import React from 'react';
 import { NOTES } from '../utils/musicLogic';
+import styles from './TunerPanel.module.css';
 
 const TunerPanel = ({ activePitchData, onClose }) => {
   const isConnected = activePitchData !== undefined;
@@ -35,42 +36,37 @@ const TunerPanel = ({ activePitchData, onClose }) => {
   const needleRotation = clampedCents * 0.9; 
 
   return (
-    <div className="tuner-panel glass-panel fade-in">
-      <div className="tuner-header">
+    <div className={`${styles.tunerPanel} glass-panel fade-in`}>
+      <div className={styles.tunerHeader}>
         <h3>Guitar Tuner</h3>
         <button 
-          className="close-panel-btn" 
           onClick={onClose}
           title="Close Tuner"
+          style={{background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem', display: 'flex'}}
         >
           <span className="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      <div className="tuner-content">
-        <div className="tuner-note-display">
-          <span className={`tuner-note ${isPerfect ? 'perfect' : ''}`}>{noteName}</span>
+      <div className={styles.tunerContent}>
+        <div className={styles.tunerNoteDisplay}>
+          <span className={`${styles.tunerNote} ${isPerfect ? styles.perfect : ''}`}>{noteName}</span>
         </div>
         
-        <div className="tuner-meter">
-          <div className="tuner-scale">
-            <span className="tuner-mark flat-mark">-50</span>
-            <span className="tuner-mark center-mark">0</span>
-            <span className="tuner-mark sharp-mark">+50</span>
+        <div className={styles.tunerMeter}>
+          <div className={styles.tunerScale}>
+            {/* The marks are visually represented by border-top dashed line now */}
           </div>
-          <div className="tuner-needle-container">
+          <div className={styles.tunerNeedleContainer} style={{ transform: `translateX(-50%) rotate(${needleRotation}deg)` }}>
             <div 
-              className="tuner-needle" 
-              style={{ 
-                transform: `rotate(${needleRotation}deg)`,
-                backgroundColor: needleColor 
-              }}
+              className={styles.tunerNeedle} 
+              style={{ backgroundColor: needleColor }}
             ></div>
-            <div className="tuner-pivot"></div>
           </div>
+          <div className={styles.tunerPivot}></div>
         </div>
 
-        <div className="tuner-status" style={{ color: needleColor }}>
+        <div className={styles.tunerStatus} style={{ color: needleColor }}>
           {statusText}
         </div>
       </div>

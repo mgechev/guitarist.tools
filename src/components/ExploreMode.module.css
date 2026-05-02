@@ -1,0 +1,46 @@
+.exploreMode { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease; width: 100%; }
+
+.controls { display: flex; justify-content: center; gap: 3rem; padding: 2rem; flex-wrap: wrap; }
+.controlGroup { display: flex; flex-direction: column; gap: 0.5rem; }
+.controlGroup label { font-size: 0.875rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 500; }
+.controlGroup select {
+  appearance: none; background: var(--panel-bg); border: 1px solid var(--panel-border);
+  color: var(--text-primary); padding: 0.75rem 3rem 0.75rem 1rem; border-radius: 0;
+  font-size: 1rem; font-family: 'Inter', sans-serif; cursor: pointer; outline: none;
+  background-image: var(--select-chevron);
+  background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
+  filter: none;
+}
+.controlGroup select:focus, .controlGroup select:hover { border-color: var(--text-primary); }
+
+.fretboardWrapper { max-width: 100%; overflow: hidden; padding: 2rem; border-radius: 12px; display: flex; flex-direction: column; gap: 2rem; }
+.shapeInfo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.shapeInfo h2 { font-size: 1.5rem; }
+.pentatonicLegend { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: var(--text-secondary); }
+.pentatonicShadowDemo {
+  display: inline-block; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--note-scale-bg); box-shadow: var(--pentatonic-glow); border: 2px solid var(--text-primary);
+}
+
+.toggleGroup { display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; }
+.horizontalToggle { flex-direction: row; align-items: center; }
+.toggleContainer { position: relative; width: 44px; height: 24px; }
+.toggleContainer input { opacity: 0; width: 0; height: 0; }
+.toggleLabel {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--panel-bg); transition: .3s; border-radius: 0; border: 1px solid var(--panel-border);
+}
+.toggleLabel:before {
+  position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+  background-color: var(--text-secondary); transition: left 0.3s ease, background-color 0.3s ease; border-radius: 0;
+}
+.toggleContainer input:checked + .toggleLabel { border-color: var(--text-primary); }
+.toggleContainer input:checked + .toggleLabel:before { left: 23px; transform: none; background-color: var(--text-primary); }
+
+.chordLegendDemo { display: inline-block; width: 16px; height: 16px; border-radius: 0; border: 2px solid var(--text-primary); }
+
+@media (max-width: 768px) {
+  .controls { flex-direction: column; align-items: stretch; padding: 1.5rem 1rem; gap: 1.5rem; box-sizing: border-box; }
+  .fretboardWrapper { padding: 1.5rem 1rem; gap: 1.5rem; box-sizing: border-box; }
+  .shapeInfo { flex-direction: column; align-items: flex-start; gap: 1rem; }
+}
