@@ -8,7 +8,7 @@ const PlayMode = ({ activeMidiNote }) => {
         <h2 style={{ margin: 0 }}>Play Freely</h2>
       </div>
 
-      <div className="fretboard-wrapper">
+      <div className="fretboard-wrapper glass-panel">
         <Fretboard 
           keyIndex={0} 
           isMinor={false} 

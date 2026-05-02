@@ -116,13 +116,15 @@ h1, h2, h3, h4, h5, h6 {
   background: transparent; border: none; color: var(--text-secondary);
   font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1rem;
   padding: 0.5rem 1rem; cursor: pointer; transition: all 0.3s ease;
-  border-bottom: 2px solid transparent;
+  border-radius: 20px; text-decoration: none;
 }
-.tab-btn:hover { color: var(--text-primary); }
-.tab-btn.active { color: var(--text-primary); border-bottom: 2px solid var(--text-primary); }
+.tab-btn:hover { color: var(--text-primary); background: var(--surface-color); }
+.tab-btn.active { color: var(--text-primary); background: var(--surface-color); font-weight: 600; }
 
-.main-content { flex: 1; display: flex; flex-direction: column; }
-.explore-mode, .practice-mode { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease; }
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.explore-mode, .practice-mode, .play-mode { display: flex; flex-direction: column; gap: 2rem; animation: fadeIn 0.5s ease; width: 100%; }
+
+.fretboard-wrapper { max-width: 100%; overflow: hidden; padding: 2rem; border-radius: 12px; }
 
 .controls { display: flex; justify-content: center; gap: 3rem; padding: 2rem; flex-wrap: wrap; }
 .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -215,7 +217,7 @@ input:checked + .toggle-label:before { left: 23px; transform: none; background-c
 .reveal-animation { animation: fadeIn 0.4s ease forwards; }
 
 .app-layout { display: flex; }
-.app-main { flex: 1; margin-left: 240px; min-height: 100vh; }
+.app-main { flex: 1; margin-left: 240px; min-height: 100vh; min-width: 0; }
 .sidenav {
   position: fixed; left: 0; top: 0; height: 100vh; width: 240px; background-color: var(--sidenav-bg);
   border-right: 1px solid var(--panel-border); display: flex; flex-direction: column;
@@ -377,11 +379,13 @@ input:checked + .toggle-label:before { left: 23px; transform: none; background-c
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: var(--primary-color);
-  color: white;
-  border: none;
+  background: var(--surface-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
   align-items: center;

@@ -43,18 +43,17 @@ const SideNav = () => {
     <nav className="sidenav">
       <div className="nav-profile">
         <div className="nav-logo">
-          <div className="nav-logo-circle">C</div>
-          <span className="nav-logo-text">CAGED Master</span>
+          <span className="nav-logo-text">guitarist.tools</span>
         </div>
       </div>
       <div className="nav-links" style={{flex: 1}}>
         <NavLink 
           to="/explore" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          title="Dashboard"
+          title="CAGED"
         >
           <span className="material-symbols-outlined">dashboard</span>
-          <span className="nav-label">Dashboard</span>
+          <span className="nav-label">CAGED</span>
         </NavLink>
         <NavLink 
           to="/play" 

@@ -22,7 +22,7 @@ function App() {
         <div className="app-container">
           <header className="app-header glass-panel">
         <div className="logo">
-          <h1>CAGED <span>Master</span></h1>
+          <h1>{isPlayMode ? 'Play' : 'CAGED'}</h1>
         </div>
         {/* Only show top tabs if not in Play mode */}
         {!isPlayMode && (
