@@ -4,7 +4,7 @@ import ExploreMode from './components/ExploreMode';
 import PracticeMode from './components/PracticeMode';
 import PlayMode from './components/PlayMode';
 import SideNav from './components/SideNav';
-import MetronomeWidget from './components/MetronomeWidget';
+import ToolsMenuWidget from './components/ToolsMenuWidget';
 import './index.css';
 
 function App() {
@@ -13,6 +13,7 @@ function App() {
   const [keyIndex, setKeyIndex] = useState(0); // C
   const [isMinor, setIsMinor] = useState(false); // Major
   const [shape, setShape] = useState('C');
+  const [activePitchData, setActivePitchData] = useState(null);
 
   return (
     <div className="app-layout">
@@ -52,13 +53,16 @@ function App() {
             />
           } />
           <Route path="/practice" element={<PracticeMode />} />
-          <Route path="/play" element={<PlayMode />} />
+          <Route path="/play" element={<PlayMode activeMidiNote={activePitchData?.midiNote || null} />} />
           <Route path="*" element={<Navigate to="/explore" replace />} />
         </Routes>
       </main>
     </div>
   </div>
-  <MetronomeWidget />
+  <ToolsMenuWidget 
+    activePitchData={activePitchData} 
+    onPitchDetected={setActivePitchData} 
+  />
 </div>
   );
 }

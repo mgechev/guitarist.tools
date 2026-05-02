@@ -3,8 +3,7 @@ import { metronome } from '../utils/metronomeLogic';
 import Button from './shared/Button';
 import Select from './shared/Select';
 
-const MetronomeWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const MetronomeWidget = ({ isOpen, onClose }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [tempo, setTempo] = useState(120);
   const [beatsPerBar, setBeatsPerBar] = useState(4);
@@ -91,8 +90,8 @@ const MetronomeWidget = () => {
             <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
               <div className={`tick-indicator ${visualTick ? `active-${visualTick}` : ''}`}></div>
               <button 
-                className="close-metronome-btn mobile-only" 
-                onClick={() => setIsOpen(false)}
+                className="close-metronome-btn" 
+                onClick={onClose}
                 style={{background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.25rem', display: 'flex'}}
               >
                 <span className="material-symbols-outlined">close</span>
@@ -141,16 +140,6 @@ const MetronomeWidget = () => {
           </div>
         </div>
       )}
-
-      <button 
-        className={`metronome-toggle ${isPlaying ? 'pulse' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        title="Toggle Metronome"
-      >
-        <span className="material-symbols-outlined">
-          timer
-        </span>
-      </button>
     </div>
   );
 };

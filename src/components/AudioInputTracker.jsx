@@ -58,13 +58,30 @@ const AudioInputTracker = ({ onPitchDetected }) => {
 
       const updatePitch = () => {
         analyserNode.getFloatTimeDomainData(input);
-        const [pitch, clarity] = detector.findPitch(input, audioContext.sampleRate);
 
-        if (clarity > 0.8 && pitch > 50 && pitch < 2000) { // Typical guitar range and good clarity
-          // Convert frequency to MIDI note number
-          // 69 is A4 (440Hz)
-          const midiNote = Math.round(69 + 12 * Math.log2(pitch / 440));
-          onPitchDetected(midiNote);
+        // Calculate RMS volume to act as a noise gate
+        let sumSquares = 0;
+        for (let i = 0; i < input.length; i++) {
+          sumSquares += input[i] * input[i];
+        }
+        const rms = Math.sqrt(sumSquares / input.length);
+
+        // Only process pitch if volume is above a threshold (e.g. 0.01)
+        if (rms > 0.01) {
+          const [pitch, clarity] = detector.findPitch(input, audioContext.sampleRate);
+
+          // Increased clarity threshold to 0.9 to ensure it's a strong, sustained tonal sound
+          if (clarity > 0.9 && pitch > 50 && pitch < 2000) { 
+            // Convert frequency to MIDI note number
+            // 69 is A4 (440Hz)
+            const midiNote = Math.round(69 + 12 * Math.log2(pitch / 440));
+            const exactFreq = 440 * Math.pow(2, (midiNote - 69) / 12);
+            const cents = 1200 * Math.log2(pitch / exactFreq);
+            
+            onPitchDetected({ midiNote, frequency: pitch, cents });
+          } else {
+            onPitchDetected(null);
+          }
         } else {
           onPitchDetected(null);
         }
