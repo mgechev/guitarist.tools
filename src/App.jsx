@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom';
 import ExploreMode from './components/ExploreMode';
 import PracticeMode from './components/PracticeMode';
 import PlayMode from './components/PlayMode';
@@ -7,7 +8,8 @@ import MetronomeWidget from './components/MetronomeWidget';
 import './index.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('explore');
+  const location = useLocation();
+  const isPlayMode = location.pathname === '/play';
   const [keyIndex, setKeyIndex] = useState(0); // C
   const [isMinor, setIsMinor] = useState(false); // Major
   const [shape, setShape] = useState('C');
@@ -21,40 +23,38 @@ function App() {
         <div className="logo">
           <h1>CAGED <span>Master</span></h1>
         </div>
-        <nav className="tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'explore' ? 'active' : ''}`}
-            onClick={() => setActiveTab('explore')}
-          >
-            Explore
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'practice' ? 'active' : ''}`}
-            onClick={() => setActiveTab('practice')}
-          >
-            Practice
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'play' ? 'active' : ''}`}
-            onClick={() => setActiveTab('play')}
-          >
-            Play
-          </button>
-        </nav>
+        {/* Only show top tabs if not in Play mode */}
+        {!isPlayMode && (
+          <nav className="tabs">
+            <NavLink 
+              to="/explore"
+              className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}
+            >
+              Explore
+            </NavLink>
+            <NavLink 
+              to="/practice"
+              className={({ isActive }) => `tab-btn ${isActive ? 'active' : ''}`}
+            >
+              Practice
+            </NavLink>
+          </nav>
+        )}
       </header>
 
       <main className="main-content">
-        {activeTab === 'explore' ? (
-          <ExploreMode 
-            keyIndex={keyIndex} setKeyIndex={setKeyIndex}
-            isMinor={isMinor} setIsMinor={setIsMinor}
-            shape={shape} setShape={setShape}
-          />
-        ) : activeTab === 'practice' ? (
-          <PracticeMode />
-        ) : (
-          <PlayMode />
-        )}
+        <Routes>
+          <Route path="/explore" element={
+            <ExploreMode 
+              keyIndex={keyIndex} setKeyIndex={setKeyIndex}
+              isMinor={isMinor} setIsMinor={setIsMinor}
+              shape={shape} setShape={setShape}
+            />
+          } />
+          <Route path="/practice" element={<PracticeMode />} />
+          <Route path="/play" element={<PlayMode />} />
+          <Route path="*" element={<Navigate to="/explore" replace />} />
+        </Routes>
       </main>
     </div>
   </div>

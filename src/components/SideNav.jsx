@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 
 const SideNav = () => {
   const [isLightMode, setIsLightMode] = useState(() => {
@@ -47,10 +48,22 @@ const SideNav = () => {
         </div>
       </div>
       <div className="nav-links" style={{flex: 1}}>
-        <a className="nav-item active" href="#" title="CAGED Master">
+        <NavLink 
+          to="/explore" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          title="Dashboard"
+        >
           <span className="material-symbols-outlined">dashboard</span>
-          <span className="nav-label">CAGED Master</span>
-        </a>
+          <span className="nav-label">Dashboard</span>
+        </NavLink>
+        <NavLink 
+          to="/play" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          title="Play"
+        >
+          <span className="material-symbols-outlined">music_note</span>
+          <span className="nav-label">Play</span>
+        </NavLink>
       </div>
       
       <div className="nav-footer" style={{width: '100%', marginTop: 'auto'}}>
