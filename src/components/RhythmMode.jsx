@@ -14,6 +14,8 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
   
   const targetTimesRef = useRef([]);
   const feedbackTimeoutRef = useRef(null);
+  const gridRef = useRef(null);
+  const playStartTimeRef = useRef(0);
 
   // Configure metronome and start/stop
   const togglePlay = () => {
@@ -47,11 +49,12 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
         }
 
         if (isTarget) {
-          targetTimesRef.current.push({ time, hit: false });
+          targetTimesRef.current.push({ time, hit: false, stepIndex: Math.floor(tick / 3) });
         }
       };
 
       metronome.start();
+      playStartTimeRef.current = getSharedAudioContext().currentTime + 0.05;
       setIsPlaying(true);
     }
   };
@@ -92,9 +95,17 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
     }
 
     if (closestIdx !== -1) {
+      const stepIdx = targets[closestIdx].stepIndex;
+      const el = gridRef.current?.children[stepIdx];
+
       if (minDiff <= 0.06) { // 60ms window for PERFECT
         targets[closestIdx].hit = true;
         showFeedback('PERFECT');
+        if (el) {
+          el.classList.remove(styles.stepHitPerfect, styles.stepHitGood);
+          void el.offsetWidth;
+          el.classList.add(styles.stepHitPerfect);
+        }
         setStreak(s => {
           const newStreak = s + 1;
           if (newStreak > maxStreak) setMaxStreak(newStreak);
@@ -103,6 +114,11 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
       } else if (minDiff <= 0.12) { // 120ms window for GOOD
         targets[closestIdx].hit = true;
         showFeedback('GOOD');
+        if (el) {
+          el.classList.remove(styles.stepHitPerfect, styles.stepHitGood);
+          void el.offsetWidth;
+          el.classList.add(styles.stepHitGood);
+        }
         setStreak(s => {
           const newStreak = s + 1;
           if (newStreak > maxStreak) setMaxStreak(newStreak);
@@ -152,6 +168,50 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
     };
   }, []);
 
+  // Animation Loop for the 16-step playhead
+  useEffect(() => {
+    if (!isPlaying) return;
+    let animId;
+    const stepDuration = (60 / tempo) / 4; // duration of one 16th note step in seconds
+
+    const updatePlayhead = () => {
+      const now = getSharedAudioContext().currentTime;
+      let elapsed = now - playStartTimeRef.current;
+      if (elapsed < 0) elapsed = 0;
+      
+      const currentStep = Math.floor(elapsed / stepDuration) % 16;
+      
+      if (gridRef.current) {
+        const steps = gridRef.current.children;
+        for (let i = 0; i < steps.length; i++) {
+          if (i === currentStep) {
+            steps[i].classList.add(styles.activeStep);
+          } else {
+            steps[i].classList.remove(styles.activeStep);
+          }
+        }
+      }
+      animId = requestAnimationFrame(updatePlayhead);
+    };
+
+    animId = requestAnimationFrame(updatePlayhead);
+    return () => cancelAnimationFrame(animId);
+  }, [isPlaying, tempo]);
+
+  const getTargetSteps = () => {
+    const steps = [];
+    for (let i = 0; i < 4; i++) { // 4 beats
+      const base = i * 4;
+      steps.push(base); // 1
+      steps.push(base + 2); // &
+      if (mode === 'gallop') {
+        steps.push(base + 3); // a
+      }
+    }
+    return steps;
+  };
+  const targetSteps = getTargetSteps();
+
   return (
     <div className={styles.rhythmMode}>
       <div className="glass-panel" style={{ padding: '2rem' }}>
@@ -175,24 +235,50 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
           </button>
         </div>
 
-        <div className={styles.statsContainer}>
-          <div className={styles.statBox}>
-            <span className={styles.statLabel}>Current Streak</span>
-            <span className={styles.statValue}>{streak}</span>
+        <div className={styles.sequencerContainer}>
+          <div className={styles.beatLabels}>
+            <span>1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
           </div>
-          
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className={styles.feedbackDisplay}>
-              {feedback === 'PERFECT' && <span key={Date.now()} className={styles.feedbackPERFECT}>PERFECT</span>}
-              {feedback === 'GOOD' && <span key={Date.now()} className={styles.feedbackGOOD}>GOOD</span>}
-              {feedback === 'MISS' && <span key={Date.now()} className={styles.feedbackMISS}>MISS</span>}
-            </div>
+          <div className={styles.sequencerGrid} ref={gridRef}>
+            {Array.from({ length: 16 }).map((_, i) => (
+              <div 
+                key={i} 
+                className={`${styles.step} ${targetSteps.includes(i) ? styles.targetStep : ''}`} 
+              />
+            ))}
           </div>
+        </div>
 
-          <div className={styles.statBox}>
-            <span className={styles.statLabel}>Best Streak</span>
-            <span className={styles.statValue}>{maxStreak}</span>
-          </div>
+        <div className={styles.statsContainer} style={{ minHeight: '146px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          {!isGuitarConnected ? (
+            <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.1rem' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '1.5rem' }}>cable</span>
+              <span>Connect guitar to track your streaks</span>
+            </div>
+          ) : (
+            <>
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>Current Streak</span>
+                <span className={styles.statValue}>{streak}</span>
+              </div>
+              
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div className={styles.feedbackDisplay}>
+                  {feedback === 'PERFECT' && <span key={Date.now()} className={styles.feedbackPERFECT}>PERFECT</span>}
+                  {feedback === 'GOOD' && <span key={Date.now()} className={styles.feedbackGOOD}>GOOD</span>}
+                  {feedback === 'MISS' && <span key={Date.now()} className={styles.feedbackMISS}>MISS</span>}
+                </div>
+              </div>
+
+              <div className={styles.statBox}>
+                <span className={styles.statLabel}>Best Streak</span>
+                <span className={styles.statValue}>{maxStreak}</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className={styles.controls}>
@@ -217,11 +303,6 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
           >
             {isPlaying ? 'Stop' : 'Start Practice'}
           </Button>
-          {!isGuitarConnected && (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-              Requires audio connection via the Tools menu (+)
-            </p>
-          )}
         </div>
       </div>
     </div>
