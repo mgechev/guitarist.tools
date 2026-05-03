@@ -5,7 +5,7 @@ import { NOTES } from '../utils/musicLogic';
 import Toggle from './shared/Toggle';
 import styles from './AudioInputTracker.module.css';
 
-const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetected }) => {
+const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetected, onAudioData }) => {
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [isTracking, setIsTracking] = useState(false);
@@ -85,9 +85,16 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
 
       const detector = PitchDetector.forFloat32Array(analyserNode.fftSize);
       const input = new Float32Array(detector.inputLength);
+      const freqData = new Uint8Array(analyserNode.frequencyBinCount);
 
       const updatePitch = () => {
         analyserNode.getFloatTimeDomainData(input);
+        analyserNode.getByteFrequencyData(freqData);
+
+        if (onAudioData) {
+          // Pass a copy so it doesn't get mutated before React renders it
+          onAudioData(new Uint8Array(freqData));
+        }
 
         // Calculate RMS volume to act as a noise gate
         let sumSquares = 0;
@@ -106,8 +113,8 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
 
           const [pitch, clarity] = detector.findPitch(input, audioContext.sampleRate);
 
-          // Increased clarity threshold to 0.9 to ensure it's a strong, sustained tonal sound
-          if (clarity > 0.9 && pitch > 50 && pitch < 2000) { 
+          // Lowered clarity threshold to 0.75 so chords (which have lower monophonic clarity) register a dominant note
+          if (clarity > 0.75 && pitch > 50 && pitch < 2000) { 
             // Convert frequency to MIDI note number
             // 69 is A4 (440Hz)
             const midiNote = Math.round(69 + 12 * Math.log2(pitch / 440));

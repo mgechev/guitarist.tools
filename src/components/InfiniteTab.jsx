@@ -21,8 +21,8 @@ const InfiniteTab = ({ activePitchData }) => {
       consecutiveNoteRef.current = { note: midiNote, count: 1 };
     }
 
-    // Only add it once exactly when count hits 5
-    if (consecutiveNoteRef.current.count === 5) {
+    // Only add it once exactly when count hits 3
+    if (consecutiveNoteRef.current.count === 3) {
       const position = getTabPosition(midiNote);
       if (position) {
         setPlayedNotes(prev => [

@@ -1,40 +1,49 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './Visualizer.module.css';
 
-const POINTS_PER_RING = 180; // Resolution of the circle
-const MAX_RINGS = 40; // Number of history rings
-const BASE_RADIUS = 50; // Starting radius in center
-const RING_SPACING = 15; // Distance between rings
-const PEAK_HEIGHT_MULTIPLIER = 80;
+const BAR_WIDTH = 6;
+const GAP = 2;
+const DOT_RADIUS = 2;
+const DOT_SPACING = 8; // Vertical space between dots
 
-const Visualizer = ({ activePitchData, activeAttackTime }) => {
+const Visualizer = ({ activePitchData, activeAttackTime, activeAudioData }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
-  const pitchDataRef = useRef(null);
+  const audioDataRef = useRef(null);
   const hasStartedRef = useRef(false);
+  const shockwaveTriggerRef = useRef(false);
   const [hasData, setHasData] = useState(false);
 
-  // Keep a reference to the latest pitch data so the animation loop can access it
+  // Trigger shockwave on attacks (chords/strums)
   useEffect(() => {
-    pitchDataRef.current = activePitchData;
-    if (activePitchData && !hasStartedRef.current) {
-      hasStartedRef.current = true;
-      setHasData(true);
+    if (activeAttackTime) {
+      shockwaveTriggerRef.current = true;
+      if (!hasStartedRef.current) {
+        hasStartedRef.current = true;
+        setHasData(true);
+      }
     }
-  }, [activePitchData]);
+  }, [activeAttackTime]);
+
+  // Keep a reference to the latest audio data so the animation loop can access it
+  useEffect(() => {
+    audioDataRef.current = activeAudioData;
+    if (activeAudioData && !hasStartedRef.current) {
+      // Check if there is actual sound (not just pure silence array of 0s)
+      const hasSound = activeAudioData.some(val => val > 10);
+      if (hasSound) {
+        hasStartedRef.current = true;
+        setHasData(true);
+      }
+    }
+  }, [activeAudioData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let width = 0;
     let height = 0;
-    let rings = [];
-
-    // Initialize rings
-    for (let i = 0; i < MAX_RINGS; i++) {
-      rings.push(new Array(POINTS_PER_RING).fill(0));
-    }
 
     const resize = () => {
       if (containerRef.current) {
@@ -51,146 +60,114 @@ const Visualizer = ({ activePitchData, activeAttackTime }) => {
     resize();
     window.addEventListener('resize', resize);
 
-    const generateCurrentRing = () => {
-      const ring = new Array(POINTS_PER_RING).fill(0);
-      const data = pitchDataRef.current;
-      
-      if (data && data.midiNote !== undefined) {
-        // Map midi note to an angle (0 to 2 PI)
-        // Assume guitar range ~E2 (40) to ~E6 (88)
-        const normalizedPitch = Math.max(0, Math.min(1, (data.midiNote - 40) / 48));
-        const targetIndex = Math.floor(normalizedPitch * POINTS_PER_RING);
-        
-        // Create a simulated peak with a bell curve (Gaussian)
-        for (let i = 0; i < POINTS_PER_RING; i++) {
-          // Calculate shortest distance around the circle
-          let dist = Math.abs(i - targetIndex);
-          if (dist > POINTS_PER_RING / 2) {
-            dist = POINTS_PER_RING - dist;
-          }
-          
-          // Gaussian function for the peak (widened)
-          const amplitude = Math.exp(-(dist * dist) / 40);
-          
-          // Add harmonic peak (e.g., an octave higher)
-          const harmonicDist = Math.abs(i - ((targetIndex + POINTS_PER_RING / 4) % POINTS_PER_RING));
-          let hDist = harmonicDist > POINTS_PER_RING / 2 ? POINTS_PER_RING - harmonicDist : harmonicDist;
-          const harmonicAmplitude = Math.exp(-(hDist * hDist) / 20) * 0.4;
-
-          ring[i] = amplitude + harmonicAmplitude;
-        }
-      }
-      return ring;
-    };
-
-    let frameCount = 0;
+    // Keep an array of smoothed bar values to allow smooth decay
+    let barHeights = [];
 
     const render = () => {
-      // Clear canvas with a slightly transparent black to leave subtle trails
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-      ctx.fillRect(0, 0, width, height);
+      // Clear canvas completely to allow CSS light/dark mode background to show through.
+      // Reset shadow blur to 0 before clearing to prevent previous frame's shadow from bleeding into the clear.
+      ctx.shadowBlur = 0;
+      ctx.clearRect(0, 0, width, height);
 
-      // Only push a new ring every few frames to create distinct rings
-      if (frameCount % 3 === 0) {
-        rings.unshift(generateCurrentRing());
-        if (rings.length > MAX_RINGS) {
-          rings.pop();
-        }
-      }
-      frameCount++;
-
-      const cx = width / 2;
-      const cy = height / 2;
-
-      ctx.save();
-      // Translate to center
-      ctx.translate(cx, cy);
-      // Apply 3D perspective squash (scale Y by 0.4)
-      ctx.scale(1, 0.4);
-      // Rotate slowly over time
-      ctx.rotate(frameCount * 0.002);
-
-      // Create a conic gradient for the rainbow effect once per frame
-      let gradient;
-      try {
-        if (ctx.createConicGradient) {
-          gradient = ctx.createConicGradient(0, 0, 0);
-          gradient.addColorStop(0, 'hsl(0, 100%, 60%)');
-          gradient.addColorStop(0.16, 'hsl(60, 100%, 60%)');
-          gradient.addColorStop(0.33, 'hsl(120, 100%, 60%)');
-          gradient.addColorStop(0.5, 'hsl(180, 100%, 60%)');
-          gradient.addColorStop(0.66, 'hsl(240, 100%, 60%)');
-          gradient.addColorStop(0.83, 'hsl(300, 100%, 60%)');
-          gradient.addColorStop(1, 'hsl(360, 100%, 60%)');
-        } else {
-          gradient = 'hsl(280, 100%, 70%)'; // Fallback
-        }
-      } catch (e) {
-        gradient = 'hsl(280, 100%, 70%)'; // Fallback
+      const data = audioDataRef.current;
+      
+      // Calculate how many bars fit horizontally
+      const numBars = Math.max(10, Math.floor(width / (BAR_WIDTH + GAP)));
+      
+      // Initialize or resize smoothed array
+      if (barHeights.length !== numBars) {
+        barHeights = new Array(numBars).fill(0);
       }
 
-      ctx.lineWidth = 1.5;
-      ctx.shadowBlur = 10;
+      let isShockwave = false;
+      if (shockwaveTriggerRef.current) {
+        isShockwave = true;
+        shockwaveTriggerRef.current = false;
+      }
 
-      // Draw rings back-to-front (oldest first)
-      for (let r = rings.length - 1; r >= 0; r--) {
-        const ring = rings[r];
-        const currentRadius = BASE_RADIUS + r * RING_SPACING;
-        const alpha = 1 - (r / MAX_RINGS);
+      // Calculate target heights
+      const targetHeights = new Array(numBars).fill(0);
+      
+      if (isShockwave) {
+        for (let i = 0; i < numBars; i++) {
+          targetHeights[i] = 0.5 + Math.random() * 0.5; 
+        }
+      } else if (data) {
+        // Map FFT bins to bars. Use first ~300 bins for relevant guitar frequencies.
+        const binsToUse = Math.min(300, data.length);
+        const binsPerBar = binsToUse / numBars;
         
-        // Use global alpha for fading out older rings
-        ctx.globalAlpha = alpha;
-        ctx.strokeStyle = gradient;
-        ctx.shadowColor = `rgba(255, 255, 255, ${alpha * 0.5})`; // generic glow
-
-        // 1. Draw the continuous ring path
-        ctx.beginPath();
-        for (let i = 0; i <= POINTS_PER_RING; i++) {
-          const idx = i % POINTS_PER_RING;
-          const angle = (idx / POINTS_PER_RING) * Math.PI * 2;
-          const amplitude = ring[idx];
+        for (let i = 0; i < numBars; i++) {
+          let sum = 0;
+          const startIndex = Math.floor(i * binsPerBar);
+          const endIndex = Math.floor((i + 1) * binsPerBar);
           
-          const radius = currentRadius + amplitude * PEAK_HEIGHT_MULTIPLIER;
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
-
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
+          for (let j = startIndex; j < endIndex; j++) {
+            sum += data[j];
           }
+          const avg = sum / (endIndex - startIndex || 1);
+          
+          // Scale and add dynamic curve
+          const normalized = avg / 255;
+          targetHeights[i] = Math.pow(normalized, 1.5) * 1.5;
         }
-        ctx.stroke();
+      }
 
-        // 2. Draw the vertical "fence" drop lines only where there are peaks
-        ctx.beginPath();
-        let hasPeaks = false;
-        for (let i = 0; i < POINTS_PER_RING; i++) {
-          const amplitude = ring[i];
-          if (amplitude > 0.1 && r < MAX_RINGS - 2) {
-            const angle = (i / POINTS_PER_RING) * Math.PI * 2;
-            const radius = currentRadius + amplitude * PEAK_HEIGHT_MULTIPLIER;
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            
-            const baseX = Math.cos(angle) * currentRadius;
-            const baseY = Math.sin(angle) * currentRadius;
-            
-            ctx.moveTo(x, y);
-            ctx.lineTo(baseX, baseY);
-            hasPeaks = true;
-          }
+      // Smooth decay logic
+      for (let i = 0; i < numBars; i++) {
+        if (targetHeights[i] > barHeights[i]) {
+          // Fast attack
+          barHeights[i] = targetHeights[i];
+        } else {
+          // Smooth decay
+          barHeights[i] -= 0.03;
+          if (barHeights[i] < 0) barHeights[i] = 0;
         }
+      }
+
+      const cy = height / 2;
+      const maxPossibleHeight = height / 2.5;
+
+      // Draw the linear dotted bars
+      for (let i = 0; i < numBars; i++) {
+        // Center the entire block of bars horizontally
+        const totalBarsWidth = numBars * (BAR_WIDTH + GAP);
+        const xOffset = (width - totalBarsWidth) / 2;
+        const x = xOffset + i * (BAR_WIDTH + GAP) + (BAR_WIDTH / 2);
         
-        if (hasPeaks) {
-          ctx.globalAlpha = alpha * 0.4;
-          ctx.shadowBlur = 0; // Turn off shadow for fences to save perf
-          ctx.stroke();
-          ctx.shadowBlur = 10; // Turn back on
+        const amplitude = barHeights[i];
+        
+        // Ensure at least 1 dot for idle state
+        let numDots = Math.max(1, Math.floor((amplitude * maxPossibleHeight) / DOT_SPACING));
+        
+        // Map color ratio: 0 to 1 across the width
+        const ratio = i / numBars;
+        
+        // From left to right: Blue (240) -> Purple/Pink (300) -> Red (0) -> Yellow (60) -> Green (120)
+        // Total hue range covered: 240 degrees (240 + 240 = 480. 480 % 360 = 120)
+        const hue = (240 + ratio * 240) % 360;
+        
+        ctx.fillStyle = `hsl(${hue}, 100%, 60%)`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
+
+        for (let j = 0; j < numDots; j++) {
+          const yDist = j * DOT_SPACING;
+          
+          // Draw top dot
+          ctx.beginPath();
+          ctx.arc(x, cy - yDist, DOT_RADIUS, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Draw bottom dot (skip drawing the exact center dot twice)
+          if (j > 0) {
+            ctx.beginPath();
+            ctx.arc(x, cy + yDist, DOT_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
       
-      ctx.restore();
       requestRef.current = requestAnimationFrame(render);
     };
 

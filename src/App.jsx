@@ -18,6 +18,7 @@ function App() {
   const [shape, setShape] = useState('C');
   const [activePitchData, setActivePitchData] = useState(null);
   const [activeAttackTime, setActiveAttackTime] = useState(null);
+  const [activeAudioData, setActiveAudioData] = useState(null);
   const [isGuitarConnected, setIsGuitarConnected] = useState(false);
 
   return (
@@ -75,7 +76,7 @@ function App() {
           } />
           <Route path="/practice" element={<PracticeMode activePitchData={activePitchData} isGuitarConnected={isGuitarConnected} />} />
           <Route path="/rhythm" element={<RhythmMode activeAttackTime={activeAttackTime} isGuitarConnected={isGuitarConnected} />} />
-          <Route path="/play/*" element={<PlayMode activePitchData={activePitchData} activeAttackTime={activeAttackTime} />} />
+          <Route path="/play/*" element={<PlayMode activePitchData={activePitchData} activeAttackTime={activeAttackTime} activeAudioData={activeAudioData} />} />
           <Route path="*" element={<Navigate to="/explore" replace />} />
         </Routes>
       </main>
@@ -85,6 +86,7 @@ function App() {
     activePitchData={activePitchData} 
     onPitchDetected={setActivePitchData} 
     onAttackDetected={setActiveAttackTime}
+    onAudioData={setActiveAudioData}
     onConnectionChange={setIsGuitarConnected}
   />
 </div>

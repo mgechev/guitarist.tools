@@ -4,11 +4,11 @@ import Visualizer from './Visualizer';
 import InfiniteTab from './InfiniteTab';
 import styles from './PlayMode.module.css';
 
-const PlayMode = ({ activePitchData, activeAttackTime }) => {
+const PlayMode = ({ activePitchData, activeAttackTime, activeAudioData }) => {
   return (
     <div className={styles.playMode} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <Routes>
-        <Route path="visualizer" element={<Visualizer activePitchData={activePitchData} activeAttackTime={activeAttackTime} />} />
+        <Route path="visualizer" element={<Visualizer activePitchData={activePitchData} activeAttackTime={activeAttackTime} activeAudioData={activeAudioData} />} />
         <Route path="tab" element={<InfiniteTab activePitchData={activePitchData} />} />
         <Route path="" element={<Navigate to="visualizer" replace />} />
       </Routes>

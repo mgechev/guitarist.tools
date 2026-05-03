@@ -89,8 +89,17 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
         const sortedTarget = Array.from(targetSet).sort((a, b) => a - b);
         if (sortedTarget.length === 0) continue;
         
-        // Up and down sequence: 1 2 3 4 5 4 3 2 1
-        const targetSequence = [...sortedTarget, ...sortedTarget.slice(0, -1).reverse()];
+        const roots = sortedTarget.filter(n => n % 12 === challengeRef.current.keyIndex);
+        if (roots.length === 0) continue;
+        
+        const minRoot = roots[0];
+        const maxRoot = roots[roots.length - 1];
+        
+        // Extract subset of notes between min and max root
+        const scaleNotes = sortedTarget.filter(n => n >= minRoot && n <= maxRoot);
+        
+        // Up and down sequence from root to root: 1 2 3 4 5 4 3 2 1
+        const targetSequence = [...scaleNotes, ...scaleNotes.slice(0, -1).reverse()];
         
         // Check if newPlayed contains targetSequence as a subsequence
         let seqIndex = 0;
