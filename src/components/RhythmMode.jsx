@@ -121,9 +121,15 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
           if (newStreak > maxStreak) setMaxStreak(newStreak);
           return newStreak;
         });
+      } else {
+        // They attacked but it was completely off-beat
+        showFeedback('MISS');
+        setStreak(0);
       }
-      // If minDiff > 0.12, they attacked too early or completely off-beat.
-      // We will let the missing loop catch it, or we could mark as MISS immediately if it's super close but outside 0.12.
+    } else {
+      // No targets available but they attacked
+      showFeedback('MISS');
+      setStreak(0);
     }
   }, [activeAttackTime, isPlaying]);
 
@@ -286,7 +292,7 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
             </div>
             <input 
               type="range" 
-              min="60" 
+              min="30" 
               max="240" 
               value={tempo} 
               onChange={(e) => handleTempoChange(parseInt(e.target.value))}

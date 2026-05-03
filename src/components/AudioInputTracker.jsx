@@ -89,6 +89,7 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
       const detector = PitchDetector.forFloat32Array(analyserNode.fftSize);
       const input = new Float32Array(detector.inputLength);
       const freqData = new Uint8Array(analyserNode.frequencyBinCount);
+      let lastAttackTime = 0;
 
       const updatePitch = () => {
         analyserNode.getFloatTimeDomainData(input);
@@ -109,8 +110,12 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
         if (rms > noiseGateRef.current) {
           // Attack detection logic: sharp volume spike
           if (rms > prevRmsRef.current * 1.5 && rms > noiseGateRef.current + 0.01) {
-            if (onAttackDetected) {
-              onAttackDetected(audioContext.currentTime);
+            const now = audioContext.currentTime;
+            if (now - lastAttackTime > 0.08) { // 80ms debounce
+              lastAttackTime = now;
+              if (onAttackDetected) {
+                onAttackDetected(now);
+              }
             }
           }
 
