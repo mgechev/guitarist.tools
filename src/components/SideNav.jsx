@@ -80,7 +80,7 @@ const SideNav = () => {
         </NavLink>
       </div>
       
-      <div className="nav-footer" style={{width: '100%', borderTop: '1px solid var(--panel-border)', paddingTop: '1rem', marginTop: 'auto'}}>
+      <div className={styles.navFooter}>
         <button 
           className={styles.navItem} 
           onClick={toggleTheme}
