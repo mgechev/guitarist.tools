@@ -1,6 +1,7 @@
 .appContainer {
   padding: 2rem;
   display: flex; flex-direction: column; gap: 2rem; flex: 1; height: 100%; box-sizing: border-box;
+  min-height: 0;
 }
 
 .appHeader {
@@ -22,7 +23,7 @@
 .tabBtn:hover { color: var(--text-primary); background: var(--surface-color); }
 .tabBtn.active { color: var(--text-primary); background: var(--surface-color); font-weight: 600; }
 
-.mainContent { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+.mainContent { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; min-height: 0; }
 
 .appLayout { display: flex; height: 100dvh; overflow: hidden; }
 .appMain { flex: 1; margin-left: 240px; height: 100dvh; display: flex; flex-direction: column; min-width: 0; }

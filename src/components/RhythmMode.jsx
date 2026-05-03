@@ -26,11 +26,6 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
       setFeedback('');
       targetTimesRef.current = [];
     } else {
-      if (!isGuitarConnected) {
-        alert("Please connect your guitar using the tools menu first!");
-        return;
-      }
-      
       metronome.setTempo(tempo);
       // Downpicking needs 8th notes, Gallop needs 16th notes
       metronome.setSubdivision(mode === 'gallop' ? 4 : 2);
@@ -39,13 +34,15 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
       metronome.onScheduledNote = (noteInfo) => {
         const { time, tick } = noteInfo;
         
+        const localTick = tick % 12;
+        
         let isTarget = false;
         if (mode === 'downpicking') {
           // Beat (0) and 8th (&) (6)
-          if (tick === 0 || tick === 6) isTarget = true;
+          if (localTick === 0 || localTick === 6) isTarget = true;
         } else if (mode === 'gallop') {
           // Beat (0), 8th (&) (6), 16th (a) (9)
-          if (tick === 0 || tick === 6 || tick === 9) isTarget = true;
+          if (localTick === 0 || localTick === 6 || localTick === 9) isTarget = true;
         }
 
         if (isTarget) {
