@@ -183,7 +183,7 @@ const Visualizer = ({ activePitchData, activeAttackTime, activeAudioData }) => {
     <div className={styles.visualizerContainer} ref={containerRef}>
       {!hasData && (
         <div className={styles.emptyState}>
-          Play your guitar to generate visuals...
+          Connect and play your guitar to generate visuals...
         </div>
       )}
       <canvas ref={canvasRef} className={styles.canvas} />

@@ -53,7 +53,7 @@ const SideNav = () => {
           <span className={styles.navLogoText}>guitarist.tools</span>
         </div>
       </div>
-      <div className={styles.navLinks} style={{flex: 1}}>
+      <div className={styles.navLinks}>
         <NavLink 
           to="/explore" 
           className={`${styles.navItem} ${isCagedActive ? styles.active : ''}`}
@@ -86,9 +86,7 @@ const SideNav = () => {
           onClick={toggleTheme}
           title={isLightMode ? "Dark Mode" : "Light Mode"}
         >
-          <span className="material-symbols-outlined">
-            {isLightMode ? 'dark_mode' : 'light_mode'}
-          </span>
+          <span className="material-symbols-outlined">{isLightMode ? 'dark_mode' : 'light_mode'}</span>
           <span className="nav-label">{isLightMode ? 'Dark Mode' : 'Light Mode'}</span>
         </button>
       </div>
