@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MetronomeWidget from './MetronomeWidget';
 import TunerPanel from './TunerPanel';
 import AudioInputTracker from './AudioInputTracker';
@@ -7,6 +7,13 @@ import styles from './ToolsMenuWidget.module.css';
 const ToolsMenuWidget = ({ activePitchData, onPitchDetected, onAttackDetected, onAudioData, onConnectionChange }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTool, setActiveTool] = useState(null); // 'metronome', 'tuner', 'connect', null
+  const [hasOpenedConnect, setHasOpenedConnect] = useState(false);
+
+  useEffect(() => {
+    if (activeTool === 'connect') {
+      setHasOpenedConnect(true);
+    }
+  }, [activeTool]);
 
   const toggleMenu = () => {
     if (activeTool) {
@@ -82,7 +89,9 @@ const ToolsMenuWidget = ({ activePitchData, onPitchDetected, onAttackDetected, o
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
             Connect your audio interface and select it below to enable pitch detection for the tuner and fretboard.
           </p>
-          <AudioInputTracker onPitchDetected={onPitchDetected} onAttackDetected={onAttackDetected} onAudioData={onAudioData} onConnectionChange={onConnectionChange} />
+          {hasOpenedConnect && (
+            <AudioInputTracker onPitchDetected={onPitchDetected} onAttackDetected={onAttackDetected} onAudioData={onAudioData} onConnectionChange={onConnectionChange} />
+          )}
         </div>
       </div>
     </>

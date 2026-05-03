@@ -53,6 +53,15 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
   
   const startTracking = async () => {
     if (!selectedDeviceId) return;
+    
+    // iOS Safari requires AudioContext to be resumed synchronously inside a user gesture.
+    // We must do this before awaiting the media stream!
+    const audioContext = getSharedAudioContext();
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    audioContextRef.current = audioContext;
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -63,12 +72,6 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
         }
       });
       streamRef.current = stream;
-
-      const audioContext = getSharedAudioContext();
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      audioContextRef.current = audioContext;
 
       const analyserNode = audioContext.createAnalyser();
       analyserNode.fftSize = 2048;
