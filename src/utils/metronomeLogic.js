@@ -1,3 +1,5 @@
+import { getSharedAudioContext } from './audioContext';
+
 class Metronome {
   constructor() {
     this.audioContext = null;
@@ -15,6 +17,7 @@ class Metronome {
     this.volume = 0.8;
     
     this.onTick = null;
+    this.onScheduledNote = null;
   }
 
   nextNote() {
@@ -50,12 +53,21 @@ class Metronome {
     }
 
     if (shouldPlay) {
-      // Visual callback
       if (this.onTick) {
         const timeUntilNote = time - this.audioContext.currentTime;
         setTimeout(() => {
           this.onTick(isAccent, isBeat, !isBeat);
         }, Math.max(0, timeUntilNote * 1000));
+      }
+      
+      if (this.onScheduledNote) {
+        this.onScheduledNote({
+          time,
+          isAccent,
+          isBeat,
+          isSubdivision: !isBeat,
+          tick
+        });
       }
 
       // Audio generation
@@ -90,7 +102,7 @@ class Metronome {
   start() {
     if (this.isPlaying) return;
     if (this.audioContext == null) {
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      this.audioContext = getSharedAudioContext();
     }
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();

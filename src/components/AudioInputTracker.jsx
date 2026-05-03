@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PitchDetector } from 'pitchy';
+import { getSharedAudioContext } from '../utils/audioContext';
 import { NOTES } from '../utils/musicLogic';
 import Toggle from './shared/Toggle';
 import styles from './AudioInputTracker.module.css';
 
-const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
+const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetected }) => {
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [isTracking, setIsTracking] = useState(false);
@@ -38,7 +39,7 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
       if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
-      if (audioContextRef.current) audioContextRef.current.close();
+      // Do not close the shared audio context
       if (monitorGainNodeRef.current) monitorGainNodeRef.current.disconnect();
     };
   }, []);
@@ -48,6 +49,8 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
     noiseGateRef.current = noiseGate;
   }, [noiseGate]);
 
+  const prevRmsRef = useRef(0);
+  
   const startTracking = async () => {
     if (!selectedDeviceId) return;
     try {
@@ -61,7 +64,7 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
       });
       streamRef.current = stream;
 
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const audioContext = getSharedAudioContext();
       if (audioContext.state === 'suspended') {
         await audioContext.resume();
       }
@@ -94,6 +97,13 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
         const rms = Math.sqrt(sumSquares / input.length);
 
         if (rms > noiseGateRef.current) {
+          // Attack detection logic: sharp volume spike
+          if (rms > prevRmsRef.current * 1.5 && rms > noiseGateRef.current + 0.01) {
+            if (onAttackDetected) {
+              onAttackDetected(audioContext.currentTime);
+            }
+          }
+
           const [pitch, clarity] = detector.findPitch(input, audioContext.sampleRate);
 
           // Increased clarity threshold to 0.9 to ensure it's a strong, sustained tonal sound
@@ -111,6 +121,8 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
         } else {
           onPitchDetected(null);
         }
+        
+        prevRmsRef.current = rms;
         
         requestRef.current = requestAnimationFrame(updatePitch);
       };
@@ -139,9 +151,7 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-    }
+    // Do not close shared audio context
     if (monitorGainNodeRef.current) {
       monitorGainNodeRef.current.disconnect();
       monitorGainNodeRef.current = null;

@@ -63,6 +63,14 @@ const SideNav = () => {
           <span className="nav-label">CAGED</span>
         </NavLink>
         <NavLink 
+          to="/rhythm" 
+          className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
+          title="Rhythm"
+        >
+          <span className="material-symbols-outlined">speed</span>
+          <span className="nav-label">Rhythm</span>
+        </NavLink>
+        <NavLink 
           to="/play" 
           className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
           title="Play"

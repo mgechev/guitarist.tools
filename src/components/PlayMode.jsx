@@ -1,50 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import TabDisplay from './TabDisplay';
-import { getTabPosition } from '../utils/musicLogic';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Visualizer from './Visualizer';
+import InfiniteTab from './InfiniteTab';
 import styles from './PlayMode.module.css';
 
-const PlayMode = ({ activePitchData }) => {
-  const [playedNotes, setPlayedNotes] = useState([]);
-  const consecutiveNoteRef = useRef({ note: null, count: 0 });
-  const activeMidiNote = activePitchData?.midiNote || null;
-
-  useEffect(() => {
-    if (!activePitchData) {
-      consecutiveNoteRef.current = { note: null, count: 0 };
-      return;
-    }
-
-    const midiNote = activePitchData.midiNote;
-
-    // Debounce logic: wait for 5 consecutive frames
-    if (consecutiveNoteRef.current.note === midiNote) {
-      consecutiveNoteRef.current.count += 1;
-    } else {
-      consecutiveNoteRef.current = { note: midiNote, count: 1 };
-    }
-
-    // Only add it once exactly when count hits 5
-    if (consecutiveNoteRef.current.count === 5) {
-      const position = getTabPosition(midiNote);
-      if (position) {
-        setPlayedNotes(prev => [
-          ...prev, 
-          { 
-            id: Date.now() + Math.random(), 
-            midiNote: midiNote, 
-            ...position 
-          }
-        ]);
-      }
-    }
-  }, [activePitchData]);
-
+const PlayMode = ({ activePitchData, activeAttackTime }) => {
   return (
     <div className={styles.playMode} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-      <TabDisplay 
-        notes={playedNotes} 
-        onClear={() => setPlayedNotes([])} 
-      />
+      <Routes>
+        <Route path="visualizer" element={<Visualizer activePitchData={activePitchData} activeAttackTime={activeAttackTime} />} />
+        <Route path="tab" element={<InfiniteTab activePitchData={activePitchData} />} />
+        <Route path="" element={<Navigate to="visualizer" replace />} />
+      </Routes>
     </div>
   );
 };
