@@ -83,3 +83,10 @@
   border-radius: 50%;
   font-size: 1.2rem;
 }
+
+@media (max-width: 768px) {
+  .toolsWidgetContainer {
+    bottom: calc(70px + 1rem); /* Push above the bottom nav bar */
+    right: 1rem;
+  }
+}
