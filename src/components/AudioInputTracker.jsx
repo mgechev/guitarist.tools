@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PitchDetector } from 'pitchy';
 import { NOTES } from '../utils/musicLogic';
+import Toggle from './shared/Toggle';
 import styles from './AudioInputTracker.module.css';
 
-const AudioInputTracker = ({ onPitchDetected }) => {
+const AudioInputTracker = ({ onPitchDetected, onConnectionChange }) => {
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [isTracking, setIsTracking] = useState(false);
-  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [isMonitoring, setIsMonitoring] = useState(true);
+  const [noiseGate, setNoiseGate] = useState(0.02);
   
   const audioContextRef = useRef(null);
   const analyserNodeRef = useRef(null);
@@ -31,7 +33,20 @@ const AudioInputTracker = ({ onPitchDetected }) => {
       }
     };
     getDevices();
+
+    // Cleanup on unmount
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
+      if (audioContextRef.current) audioContextRef.current.close();
+      if (monitorGainNodeRef.current) monitorGainNodeRef.current.disconnect();
+    };
   }, []);
+
+  const noiseGateRef = useRef(noiseGate);
+  useEffect(() => {
+    noiseGateRef.current = noiseGate;
+  }, [noiseGate]);
 
   const startTracking = async () => {
     if (!selectedDeviceId) return;
@@ -47,6 +62,9 @@ const AudioInputTracker = ({ onPitchDetected }) => {
       streamRef.current = stream;
 
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
       audioContextRef.current = audioContext;
 
       const analyserNode = audioContext.createAnalyser();
@@ -75,8 +93,7 @@ const AudioInputTracker = ({ onPitchDetected }) => {
         }
         const rms = Math.sqrt(sumSquares / input.length);
 
-        // Only process pitch if volume is above a threshold (e.g. 0.01)
-        if (rms > 0.01) {
+        if (rms > noiseGateRef.current) {
           const [pitch, clarity] = detector.findPitch(input, audioContext.sampleRate);
 
           // Increased clarity threshold to 0.9 to ensure it's a strong, sustained tonal sound
@@ -99,6 +116,7 @@ const AudioInputTracker = ({ onPitchDetected }) => {
       };
 
       setIsTracking(true);
+      if (onConnectionChange) onConnectionChange(true);
       updatePitch();
 
     } catch (err) {
@@ -129,6 +147,7 @@ const AudioInputTracker = ({ onPitchDetected }) => {
       monitorGainNodeRef.current = null;
     }
     setIsTracking(false);
+    if (onConnectionChange) onConnectionChange(false);
     onPitchDetected(null);
   };
 
@@ -153,16 +172,31 @@ const AudioInputTracker = ({ onPitchDetected }) => {
         <button onClick={stopTracking} className={`${styles.trackingBtn} ${styles.stop}`}>Disconnect</button>
       )}
 
-      <div className="toggle-group horizontal-toggle" style={{ marginTop: '0.5rem', width: '100%', justifyContent: 'space-between', padding: '0 5px' }}>
-        <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Monitor Audio</span>
-        <div className="toggle-container">
-          <input 
-            type="checkbox" 
+      <div style={{ marginTop: '0.75rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0 5px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Monitor Audio</span>
+          <Toggle 
             id="monitor-toggle"
-            checked={isMonitoring} 
-            onChange={(e) => setIsMonitoring(e.target.checked)} 
+            checked={isMonitoring}
+            onChange={setIsMonitoring}
           />
-          <label htmlFor="monitor-toggle" className="toggle-label"></label>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Noise Gate</span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-primary)' }}>{Math.round(noiseGate * 1000)}</span>
+          </div>
+          <input 
+            type="range" 
+            min="0.001" 
+            max="0.1" 
+            step="0.001" 
+            value={noiseGate} 
+            onChange={(e) => setNoiseGate(parseFloat(e.target.value))}
+            style={{ width: '100%', accentColor: 'var(--text-primary)' }}
+            title="Increase this if background noise/hum is registering as played notes."
+          />
         </div>
       </div>
     </div>

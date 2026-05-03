@@ -67,3 +67,64 @@ export function getChordTones(scale) {
   return [scale[0], scale[2], scale[4]];
 }
 
+// Get all absolute MIDI notes for a given shape, key, and scale
+// Returns an array of Sets, where each Set contains the target MIDI notes for one octave region (base, octaveUp, octaveDown)
+export function getShapeMidiNotes(shape, keyIndex, isMinor) {
+  const scale = getScale(keyIndex, isMinor);
+  const windowBounds = getShapeFretWindow(shape, keyIndex, isMinor);
+  
+  const baseNotes = new Set();
+  const octaveUpNotes = new Set();
+  const octaveDownNotes = new Set();
+  
+  const numFrets = 22;
+  
+  for (let sIndex = 0; sIndex < 6; sIndex++) {
+    for (let f = 0; f <= numFrets; f++) {
+      const noteIndex = (STRING_ROOTS[sIndex] + f) % 12;
+      const isInScale = scale.includes(noteIndex);
+      
+      const inBaseWindow = f >= windowBounds[0] && f <= windowBounds[1];
+      const inOctaveUp = f >= windowBounds[0] + 12 && f <= windowBounds[1] + 12;
+      const inOctaveDown = f >= windowBounds[0] - 12 && f <= windowBounds[1] - 12;
+
+      const isGString = sIndex === 2;
+      const isCShapeExceptionBase = shape === 'C' && isGString && (f === windowBounds[0] + 4);
+      const isCShapeExceptionUp = shape === 'C' && isGString && (f === windowBounds[0] + 16);
+      const isCShapeExceptionDown = shape === 'C' && isGString && (f === windowBounds[0] - 8);
+
+      if (isInScale) {
+        if (inBaseWindow && !isCShapeExceptionBase) {
+          baseNotes.add(STRING_MIDI_ROOTS[sIndex] + f);
+        }
+        if (inOctaveUp && !isCShapeExceptionUp) {
+          octaveUpNotes.add(STRING_MIDI_ROOTS[sIndex] + f);
+        }
+        if (inOctaveDown && !isCShapeExceptionDown) {
+          octaveDownNotes.add(STRING_MIDI_ROOTS[sIndex] + f);
+        }
+      }
+    }
+  }
+  
+  return [baseNotes, octaveUpNotes, octaveDownNotes].filter(set => set.size > 0);
+}
+
+// Get tab position (string and fret) for a given MIDI note
+export function getTabPosition(midiNote) {
+  let bestPos = null;
+  
+  // Iterate through strings (0 is high e, 5 is low E)
+  for (let sIndex = 0; sIndex < 6; sIndex++) {
+    const stringMidi = STRING_MIDI_ROOTS[sIndex];
+    const fret = midiNote - stringMidi;
+    
+    if (fret >= 0 && fret <= 22) {
+      if (!bestPos || fret < bestPos.fret) {
+        bestPos = { stringIndex: sIndex, fret };
+      }
+    }
+  }
+  
+  return bestPos;
+}

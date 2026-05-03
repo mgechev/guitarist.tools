@@ -2,7 +2,7 @@ import React from 'react';
 import { NOTES, STRING_ROOTS, STRING_MIDI_ROOTS, getScale, getPentatonic, getShapeFretWindow, getChordTones } from '../utils/musicLogic';
 import styles from './Fretboard.module.css';
 
-const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord = false, activeMidiNote = null, isPlayMode = false }) => {
+const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord = false, activeMidiNote = null, isPlayMode = false, playedNotes = null, targetMidiNotes = [] }) => {
   const scale = getScale(keyIndex, isMinor);
   const pentatonic = getPentatonic(scale, isMinor);
   const chordTones = getChordTones(scale);
@@ -48,19 +48,43 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
 
                 const absoluteMidiNote = STRING_MIDI_ROOTS[sIndex] + f;
 
-                const showNote = isPlayMode ? (activeMidiNote === absoluteMidiNote) : (isInScale && isInWindow && !isCShapeException);
-                const showPentatonicHighlight = !isPlayMode && showPentatonic && isPentatonic;
-                const showChordHighlight = !isPlayMode && showChord && isChordTone;
+                const isTarget = isInScale && isInWindow && !isCShapeException;
+                const isPlayed = playedNotes && playedNotes.includes(absoluteMidiNote);
+                const isWrongPitch = isPlayed && targetMidiNotes.length > 0 && !targetMidiNotes.includes(absoluteMidiNote);
+                
+                let showNote = false;
+                if (isPlayMode) {
+                  showNote = (activeMidiNote === absoluteMidiNote);
+                } else if (playedNotes !== null) {
+                  // In "Show Answer" mode with connected guitar: show target notes AND any wrong notes played
+                  showNote = isTarget || isWrongPitch;
+                } else {
+                  // Normal "Show Answer" mode (not connected)
+                  showNote = isTarget;
+                }
+
+                const showPentatonicHighlight = !isPlayMode && showPentatonic && isPentatonic && isTarget;
+                const showChordHighlight = !isPlayMode && showChord && isChordTone && isTarget;
                 const isActivePitch = isPlayMode && (activeMidiNote === absoluteMidiNote);
+
+                let evaluationClass = '';
+                if (playedNotes !== null && showNote) {
+                  if (isPlayed && isTarget) {
+                    evaluationClass = styles.correctNote;
+                  } else if (isPlayed && !isTarget) {
+                    evaluationClass = styles.incorrectNote;
+                  }
+                }
 
                 return (
                   <div key={`note-${sIndex}-${f}`} className={`${styles.fretCell} ${f === 0 ? styles.openStringCell : ''}`}>
                     {showNote && (
                       <div className={`${styles.noteCircle} 
-                        ${isRoot && !isPlayMode ? styles.rootNote : styles.scaleNote} 
+                        ${isRoot && !isPlayMode && !evaluationClass ? styles.rootNote : styles.scaleNote} 
                         ${showPentatonicHighlight ? styles.pentatonicShadow : ''}
                         ${showChordHighlight ? styles.chordHighlight : ''}
-                        ${isActivePitch ? styles.activePitchHighlight : ''}`}
+                        ${isActivePitch ? styles.activePitchHighlight : ''}
+                        ${evaluationClass}`}
                       >
                         {NOTES[noteIndex]}
                       </div>

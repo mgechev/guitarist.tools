@@ -1,6 +1,6 @@
 .appContainer {
-  max-width: 1400px; margin: 0 auto; padding: 2rem;
-  display: flex; flex-direction: column; gap: 2rem; min-height: 100vh;
+  padding: 2rem;
+  display: flex; flex-direction: column; gap: 2rem; flex: 1; height: 100%; box-sizing: border-box;
 }
 
 .appHeader {
@@ -22,10 +22,10 @@
 .tabBtn:hover { color: var(--text-primary); background: var(--surface-color); }
 .tabBtn.active { color: var(--text-primary); background: var(--surface-color); font-weight: 600; }
 
-.mainContent { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.mainContent { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
 
 .appLayout { display: flex; }
-.appMain { flex: 1; margin-left: 240px; min-height: 100vh; min-width: 0; }
+.appMain { flex: 1; margin-left: 240px; height: 100vh; display: flex; flex-direction: column; min-width: 0; }
 
 @media (max-width: 768px) {
   .appContainer { padding: 1rem; gap: 1rem; }

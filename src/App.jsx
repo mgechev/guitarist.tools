@@ -15,6 +15,7 @@ function App() {
   const [isMinor, setIsMinor] = useState(false); // Major
   const [shape, setShape] = useState('C');
   const [activePitchData, setActivePitchData] = useState(null);
+  const [isGuitarConnected, setIsGuitarConnected] = useState(false);
 
   return (
     <div className={styles.appLayout}>
@@ -53,8 +54,8 @@ function App() {
               shape={shape} setShape={setShape}
             />
           } />
-          <Route path="/practice" element={<PracticeMode />} />
-          <Route path="/play" element={<PlayMode activeMidiNote={activePitchData?.midiNote || null} />} />
+          <Route path="/practice" element={<PracticeMode activePitchData={activePitchData} isGuitarConnected={isGuitarConnected} />} />
+          <Route path="/play" element={<PlayMode activePitchData={activePitchData} />} />
           <Route path="*" element={<Navigate to="/explore" replace />} />
         </Routes>
       </main>
@@ -63,6 +64,7 @@ function App() {
   <ToolsMenuWidget 
     activePitchData={activePitchData} 
     onPitchDetected={setActivePitchData} 
+    onConnectionChange={setIsGuitarConnected}
   />
 </div>
   );

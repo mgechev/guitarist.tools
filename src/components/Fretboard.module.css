@@ -34,3 +34,17 @@
   z-index: 10 !important;
   transition: all 0.1s ease-out !important;
 }
+
+.correctNote {
+  background-color: #10b981 !important; /* emerald green */
+  color: #ffffff !important;
+  border-color: #047857 !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.6) !important;
+}
+
+.incorrectNote {
+  background-color: #ef4444 !important; /* red */
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.6) !important;
+}

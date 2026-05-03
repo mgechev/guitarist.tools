@@ -1,0 +1,114 @@
+.tabWrapper {
+  width: 100%;
+  flex: 1;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabHeader {
+  padding: 1rem;
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tabTitle {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  font-family: 'Inter', monospace;
+  font-weight: 600;
+  overflow-y: auto;
+  flex: 1;
+  position: relative;
+}
+
+.tabRow {
+  display: flex;
+  margin-bottom: 2.5rem;
+  width: 100%;
+}
+
+.stringLabels {
+  display: flex;
+  flex-direction: column;
+  padding-right: 1rem;
+  background: var(--panel-bg);
+  border-right: 2px solid var(--panel-border);
+  flex-shrink: 0;
+}
+
+.stringLabel {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+.scrollArea {
+  display: flex;
+  flex: 1;
+}
+
+.tabColumn {
+  display: flex;
+  flex-direction: column;
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.tabCell {
+  height: 24px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.tabCell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--panel-border);
+  z-index: 0;
+}
+
+.tabCell span {
+  background: var(--panel-bg);
+  padding: 0 2px;
+  z-index: 1;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}

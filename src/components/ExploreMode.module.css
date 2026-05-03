@@ -13,7 +13,7 @@
 }
 .controlGroup select:focus, .controlGroup select:hover { border-color: var(--text-primary); }
 
-.fretboardWrapper { max-width: 100%; overflow: hidden; padding: 2rem; border-radius: 12px; display: flex; flex-direction: column; gap: 2rem; }
+.fretboardWrapper { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 2rem; border-radius: 12px; display: flex; flex-direction: column; gap: 2rem; box-sizing: border-box; }
 .shapeInfo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .shapeInfo h2 { font-size: 1.5rem; }
 .pentatonicLegend { display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: var(--text-secondary); }

@@ -1,19 +1,130 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Fretboard from './Fretboard';
-import { NOTES } from '../utils/musicLogic';
+import { NOTES, getShapeMidiNotes } from '../utils/musicLogic';
+import confetti from 'canvas-confetti';
 import Toggle from './shared/Toggle';
 import Button from './shared/Button';
 import styles from './PracticeMode.module.css';
 
 const SHAPES = ['C', 'A', 'G', 'E', 'D'];
 
-const PracticeMode = () => {
+const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
   const [challenge, setChallenge] = useState(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [showPentatonic, setShowPentatonic] = useState(true);
   const [showChord, setShowChord] = useState(false);
   const [allowedKeys, setAllowedKeys] = useState(NOTES.map((_, i) => i));
   const [allowedScales, setAllowedScales] = useState(['major', 'minor']);
+  const [playedNotes, setPlayedNotes] = useState([]);
+  const [targetNotes, setTargetNotes] = useState([]);
+  
+  const playedNotesRef = useRef(playedNotes);
+  const targetNotesRef = useRef(targetNotes);
+  const challengeRef = useRef(challenge);
+
+  // Keep refs up to date for the event handlers
+  useEffect(() => { playedNotesRef.current = playedNotes; }, [playedNotes]);
+  useEffect(() => { targetNotesRef.current = targetNotes; }, [targetNotes]);
+  useEffect(() => { challengeRef.current = challenge; }, [challenge]);
+
+  const consecutiveNoteRef = useRef({ note: null, count: 0 });
+
+  // Audio Tracking
+  useEffect(() => {
+    if (!isGuitarConnected || !challenge || showAnswer) {
+      consecutiveNoteRef.current = { note: null, count: 0 };
+      return;
+    }
+
+    if (!activePitchData) {
+      consecutiveNoteRef.current = { note: null, count: 0 };
+      return;
+    }
+
+    const midiNote = activePitchData.midiNote;
+    
+    // Calculate the absolute bounds of the current challenge
+    let minTarget = Infinity;
+    let maxTarget = -Infinity;
+    if (targetNotesRef.current.length > 0) {
+      for (let set of targetNotesRef.current) {
+        for (let n of set) {
+          if (n < minTarget) minTarget = n;
+          if (n > maxTarget) maxTarget = n;
+        }
+      }
+      
+      // Filter out extreme false positives (sympathetic resonance of open strings, high harmonics)
+      // If a note is more than 4 semitones outside the entire shape's range, ignore it.
+      if (midiNote < minTarget - 4 || midiNote > maxTarget + 4) {
+        consecutiveNoteRef.current = { note: null, count: 0 };
+        return;
+      }
+    }
+    
+    // Debounce: require note to be detected for 5 consecutive frames
+    if (consecutiveNoteRef.current.note === midiNote) {
+      consecutiveNoteRef.current.count += 1;
+    } else {
+      consecutiveNoteRef.current = { note: midiNote, count: 1 };
+    }
+
+    if (consecutiveNoteRef.current.count < 5) {
+      return; // Not held long enough yet
+    }
+
+    // Only add if it's different from the last note played
+    const lastPlayedNote = playedNotesRef.current.length > 0 
+      ? playedNotesRef.current[playedNotesRef.current.length - 1] 
+      : null;
+
+    if (midiNote !== lastPlayedNote) {
+      const newPlayed = [...playedNotesRef.current, midiNote];
+      setPlayedNotes(newPlayed);
+
+      // Check success: user must complete AT LEAST ONE of the octave regions fully, up and down
+      let success = false;
+      for (let targetSet of targetNotesRef.current) {
+        // Construct the up and down sequence
+        const sortedTarget = Array.from(targetSet).sort((a, b) => a - b);
+        if (sortedTarget.length === 0) continue;
+        
+        // Up and down sequence: 1 2 3 4 5 4 3 2 1
+        const targetSequence = [...sortedTarget, ...sortedTarget.slice(0, -1).reverse()];
+        
+        // Check if newPlayed contains targetSequence as a subsequence
+        let seqIndex = 0;
+        for (let played of newPlayed) {
+          if (played === targetSequence[seqIndex]) {
+            seqIndex++;
+            if (seqIndex === targetSequence.length) {
+              success = true;
+              break;
+            }
+          }
+        }
+        
+        if (success) {
+          break;
+        }
+      }
+
+      if (success) {
+        // Trigger Fireworks!
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff']
+        });
+        
+        // Wait 1.5 seconds then pick next challenge
+        setTimeout(() => {
+          pickRandom();
+        }, 1500);
+      }
+    }
+  }, [activePitchData, isGuitarConnected, challenge, showAnswer]);
 
   const toggleKey = (keyIndex) => {
     setAllowedKeys(prev => 
@@ -46,6 +157,8 @@ const PracticeMode = () => {
       isMinor: randomIsMinor,
       shape: randomShape
     });
+    setTargetNotes(getShapeMidiNotes(randomShape, randomKey, randomIsMinor));
+    setPlayedNotes([]);
     setShowAnswer(false);
   };
 
@@ -128,6 +241,8 @@ const PracticeMode = () => {
             shape={challenge.shape} 
             showPentatonic={showPentatonic}
             showChord={showChord}
+            playedNotes={isGuitarConnected ? playedNotes : null}
+            targetMidiNotes={Array.from(new Set(targetNotes.flatMap(set => Array.from(set))))}
           />
         </div>
       )}

@@ -18,7 +18,7 @@
 .highlightText { color: var(--text-primary); font-weight: 600; border-bottom: 1px solid var(--text-primary); }
 .emptyState { padding: 4rem; text-align: center; color: var(--text-secondary); font-size: 1.1rem; }
 
-.fretboardWrapper { max-width: 100%; overflow: hidden; padding: 2rem; border-radius: 12px; }
+.fretboardWrapper { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 2rem; border-radius: 12px; box-sizing: border-box; }
 
 @media (max-width: 768px) {
   .practiceActions { flex-direction: column; }
