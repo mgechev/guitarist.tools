@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Fretboard from './Fretboard';
 import { NOTES, getShapeMidiNotes } from '../utils/musicLogic';
 import confetti from 'canvas-confetti';
 import Toggle from './shared/Toggle';
 import Button from './shared/Button';
+import { getSharedAudioContext } from '../utils/audioContext';
 import styles from './PracticeMode.module.css';
 
 const SHAPES = ['C', 'A', 'G', 'E', 'D'];
@@ -21,6 +22,7 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
   const playedNotesRef = useRef(playedNotes);
   const targetNotesRef = useRef(targetNotes);
   const challengeRef = useRef(challenge);
+  const prevChallengeRef = useRef(null);
 
   // Keep refs up to date for the event handlers
   useEffect(() => { playedNotesRef.current = playedNotes; }, [playedNotes]);
@@ -28,6 +30,101 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
   useEffect(() => { challengeRef.current = challenge; }, [challenge]);
 
   const consecutiveNoteRef = useRef({ note: null, count: 0 });
+
+  const pickRandom = () => {
+    if (allowedKeys.length === 0 || allowedScales.length === 0) {
+      alert('Please select at least one key and one scale!');
+      return;
+    }
+    
+    let randomKey;
+    let randomScaleStr;
+    let randomIsMinor;
+    let randomShape;
+    let attempts = 0;
+    
+    do {
+      randomKey = allowedKeys[Math.floor(Math.random() * allowedKeys.length)];
+      randomScaleStr = allowedScales[Math.floor(Math.random() * allowedScales.length)];
+      randomIsMinor = randomScaleStr === 'minor';
+      randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      attempts++;
+    } while (
+      prevChallengeRef.current && 
+      prevChallengeRef.current.keyIndex === randomKey && 
+      prevChallengeRef.current.isMinor === randomIsMinor && 
+      prevChallengeRef.current.shape === randomShape &&
+      attempts < 10
+    );
+    
+    const newChallenge = {
+      keyIndex: randomKey,
+      isMinor: randomIsMinor,
+      shape: randomShape
+    };
+    
+    prevChallengeRef.current = newChallenge;
+    setChallenge(newChallenge);
+    setTargetNotes(getShapeMidiNotes(randomShape, randomKey, randomIsMinor));
+    setPlayedNotes([]);
+    setShowAnswer(false);
+  };
+
+  const pickRandomRef = useRef(pickRandom);
+  useEffect(() => {
+    pickRandomRef.current = pickRandom;
+  });
+
+  const playSuccessChime = () => {
+    const ctx = getSharedAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    const now = ctx.currentTime;
+    // Frequencies for C major arpeggio: C5, E5, G5, C6
+    const freqs = [523.25, 659.25, 783.99, 1046.50];
+    freqs.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const noteStart = now + index * 0.12;
+      const noteDuration = 0.6;
+      gain.gain.setValueAtTime(0, noteStart);
+      gain.gain.linearRampToValueAtTime(0.15, noteStart + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, noteStart + noteDuration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(noteStart);
+      osc.stop(noteStart + noteDuration + 0.1);
+    });
+  };
+
+  const getTargetSequences = () => {
+    if (!challenge) return [];
+    return targetNotes.map(targetSet => {
+      const sortedTarget = Array.from(targetSet).sort((a, b) => a - b);
+      const roots = sortedTarget.filter(n => n % 12 === challenge.keyIndex);
+      if (roots.length === 0) return [];
+      const minRoot = roots[0];
+      const maxRoot = roots[roots.length - 1];
+      const scaleNotes = sortedTarget.filter(n => n >= minRoot && n <= maxRoot);
+      return [...scaleNotes, ...scaleNotes.slice(0, -1).reverse()];
+    }).filter(seq => seq.length > 0);
+  };
+
+  const getSequenceProgress = (seq, played) => {
+    let seqIndex = 0;
+    for (let playedNote of played) {
+      if (playedNote === seq[seqIndex]) {
+        seqIndex++;
+        if (seqIndex === seq.length) break;
+      }
+    }
+    return seqIndex;
+  };
+
 
   // Audio Tracking
   useEffect(() => {
@@ -119,17 +216,20 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
       }
 
       if (success) {
-        // Trigger Fireworks!
+        // Trigger Fireworks & Chime!
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
           colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff']
         });
+        playSuccessChime();
         
         // Wait 1.5 seconds then pick next challenge
         setTimeout(() => {
-          pickRandom();
+          if (pickRandomRef.current) {
+            pickRandomRef.current();
+          }
         }, 1500);
       }
     }
@@ -151,25 +251,7 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
     );
   };
 
-  const pickRandom = () => {
-    if (allowedKeys.length === 0 || allowedScales.length === 0) {
-      alert('Please select at least one key and one scale!');
-      return;
-    }
-    const randomKey = allowedKeys[Math.floor(Math.random() * allowedKeys.length)];
-    const randomScaleStr = allowedScales[Math.floor(Math.random() * allowedScales.length)];
-    const randomIsMinor = randomScaleStr === 'minor';
-    const randomShape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-    
-    setChallenge({
-      keyIndex: randomKey,
-      isMinor: randomIsMinor,
-      shape: randomShape
-    });
-    setTargetNotes(getShapeMidiNotes(randomShape, randomKey, randomIsMinor));
-    setPlayedNotes([]);
-    setShowAnswer(false);
-  };
+  // pickRandom is declared above
 
   return (
     <div className={styles.practiceMode}>
@@ -223,6 +305,40 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
           <h3 className={styles.challengeText}>
             Find the <span className={styles.highlightText}>{NOTES[challenge.keyIndex]} {challenge.isMinor ? 'Minor' : 'Major'}</span> scale in the <span className={styles.highlightText}>{challenge.shape} Shape</span>
           </h3>
+          
+          <div className={styles.progressContainer}>
+            {getTargetSequences().map((seq, seqIdx) => {
+              const progress = getSequenceProgress(seq, playedNotes);
+              return (
+                <div key={seqIdx} className={styles.progressSequence}>
+                  <div className={styles.sequenceLabel}>
+                    Scale Region {seqIdx + 1} Note Sequence:
+                  </div>
+                  <div className={styles.sequenceNotes}>
+                    {seq.map((midiNote, noteIdx) => {
+                      const noteName = NOTES[midiNote % 12];
+                      const isPlayed = noteIdx < progress;
+                      const isCurrent = noteIdx === progress;
+                      return (
+                        <span 
+                          key={noteIdx} 
+                          className={`${styles.progressNote} ${isPlayed ? styles.played : ''} ${isCurrent ? styles.current : ''}`}
+                          title={`MIDI note: ${midiNote}`}
+                        >
+                          {noteName}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            {!isGuitarConnected && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                Connect a guitar or microphone to practice playing these notes in sequence.
+              </p>
+            )}
+          </div>
         </div>
       )}
 

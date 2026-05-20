@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TabDisplay from './TabDisplay';
 import { getTabPosition } from '../utils/musicLogic';
 
@@ -21,20 +21,26 @@ const InfiniteTab = ({ activePitchData }) => {
       consecutiveNoteRef.current = { note: midiNote, count: 1 };
     }
 
+    let timeoutId;
     // Only add it once exactly when count hits 3
     if (consecutiveNoteRef.current.count === 3) {
       const position = getTabPosition(midiNote);
       if (position) {
-        setPlayedNotes(prev => [
-          ...prev, 
-          { 
-            id: Date.now() + Math.random(), 
-            midiNote: midiNote, 
-            ...position 
-          }
-        ]);
+        timeoutId = setTimeout(() => {
+          setPlayedNotes(prev => [
+            ...prev, 
+            { 
+              id: Date.now() + Math.random(), 
+              midiNote: midiNote, 
+              ...position 
+            }
+          ]);
+        }, 0);
       }
     }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [activePitchData]);
 
   return (

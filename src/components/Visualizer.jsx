@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './Visualizer.module.css';
 
 const BAR_WIDTH = 6;
@@ -6,7 +6,7 @@ const GAP = 2;
 const DOT_RADIUS = 2;
 const DOT_SPACING = 8; // Vertical space between dots
 
-const Visualizer = ({ activePitchData, activeAttackTime, activeAudioData }) => {
+const Visualizer = ({ activeAttackTime, activeAudioData }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
@@ -21,7 +21,7 @@ const Visualizer = ({ activePitchData, activeAttackTime, activeAudioData }) => {
       shockwaveTriggerRef.current = true;
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
-        setHasData(true);
+        setTimeout(() => setHasData(true), 0);
       }
     }
   }, [activeAttackTime]);
@@ -34,7 +34,7 @@ const Visualizer = ({ activePitchData, activeAttackTime, activeAudioData }) => {
       const hasSound = activeAudioData.some(val => val > 10);
       if (hasSound) {
         hasStartedRef.current = true;
-        setHasData(true);
+        setTimeout(() => setHasData(true), 0);
       }
     }
   }, [activeAudioData]);

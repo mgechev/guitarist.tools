@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom';
 import ExploreMode from './components/ExploreMode';
 import PracticeMode from './components/PracticeMode';

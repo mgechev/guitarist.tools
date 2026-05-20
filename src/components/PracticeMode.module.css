@@ -24,3 +24,68 @@
   .practiceActions { flex-direction: column; }
   .fretboardWrapper { padding: 1.5rem 1rem; gap: 1.5rem; box-sizing: border-box; }
 }
+
+.progressContainer {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.progressSequence {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.sequenceLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.sequenceNotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.progressNote {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressNote.played {
+  background: #10b981;
+  color: #000;
+  border-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.progressNote.current {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+  animation: notePulse 1.5s infinite alternate;
+}
+
+@keyframes notePulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+

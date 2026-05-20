@@ -15,6 +15,7 @@ class Metronome {
     this.beatsPerBar = 4;
     this.subdivision = 1; // 1 = Quarter, 2 = Eighth, 3 = Triplet, 4 = Sixteenth
     this.volume = 0.8;
+    this.soundType = 'synth'; // 'synth', 'woodblock', 'cowbell'
     
     this.onTick = null;
     this.onScheduledNote = null;
@@ -70,24 +71,77 @@ class Metronome {
         });
       }
 
-      // Audio generation
-      const osc = this.audioContext.createOscillator();
-      const envelope = this.audioContext.createGain();
-
-      osc.frequency.value = frequency;
-      // Use square wave for a sharper "click" sound
-      osc.type = 'square';
-      
       const clickVolume = isAccent ? this.volume : (isBeat ? this.volume * 0.8 : this.volume * 0.4);
 
-      envelope.gain.setValueAtTime(clickVolume, time);
-      envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+      // Audio generation based on sound type
+      if (this.soundType === 'woodblock') {
+        const osc = this.audioContext.createOscillator();
+        const envelope = this.audioContext.createGain();
+        osc.type = 'sine';
+        
+        const startFreq = isAccent ? 1400 : (isBeat ? 1100 : 900);
+        const endFreq = isAccent ? 700 : (isBeat ? 550 : 450);
+        
+        osc.frequency.setValueAtTime(startFreq, time);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, time + 0.015);
+        
+        envelope.gain.setValueAtTime(clickVolume * 0.5, time);
+        envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+        
+        osc.connect(envelope);
+        envelope.connect(this.audioContext.destination);
+        
+        osc.start(time);
+        osc.stop(time + 0.06);
+      } else if (this.soundType === 'cowbell') {
+        const baseRatio = isAccent ? 1.2 : (isBeat ? 1.0 : 0.85);
+        const f1 = 540 * baseRatio;
+        const f2 = 800 * baseRatio;
+        
+        const osc1 = this.audioContext.createOscillator();
+        const osc2 = this.audioContext.createOscillator();
+        const filter = this.audioContext.createBiquadFilter();
+        const envelope = this.audioContext.createGain();
+        
+        osc1.type = 'square';
+        osc1.frequency.value = f1;
+        
+        osc2.type = 'square';
+        osc2.frequency.value = f2;
+        
+        filter.type = 'bandpass';
+        filter.Q.value = 3.0;
+        filter.frequency.value = f2;
+        
+        envelope.gain.setValueAtTime(clickVolume * 0.35, time);
+        envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+        
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(envelope);
+        envelope.connect(this.audioContext.destination);
+        
+        osc1.start(time);
+        osc2.start(time);
+        osc1.stop(time + 0.1);
+        osc2.stop(time + 0.1);
+      } else {
+        // Original square wave synth click
+        const osc = this.audioContext.createOscillator();
+        const envelope = this.audioContext.createGain();
 
-      osc.connect(envelope);
-      envelope.connect(this.audioContext.destination);
+        osc.frequency.value = frequency;
+        osc.type = 'square';
+        
+        envelope.gain.setValueAtTime(clickVolume, time);
+        envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
 
-      osc.start(time);
-      osc.stop(time + 0.05);
+        osc.connect(envelope);
+        envelope.connect(this.audioContext.destination);
+
+        osc.start(time);
+        osc.stop(time + 0.05);
+      }
     }
   }
 
@@ -129,6 +183,10 @@ class Metronome {
   
   setSubdivision(subdiv) {
     this.subdivision = subdiv;
+  }
+
+  setSoundType(type) {
+    this.soundType = type;
   }
 }
 

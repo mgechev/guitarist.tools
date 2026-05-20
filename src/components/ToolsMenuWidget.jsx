@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import MetronomeWidget from './MetronomeWidget';
 import TunerPanel from './TunerPanel';
 import AudioInputTracker from './AudioInputTracker';
@@ -9,11 +9,6 @@ const ToolsMenuWidget = ({ activePitchData, onPitchDetected, onAttackDetected, o
   const [activeTool, setActiveTool] = useState(null); // 'metronome', 'tuner', 'connect', null
   const [hasOpenedConnect, setHasOpenedConnect] = useState(false);
 
-  useEffect(() => {
-    if (activeTool === 'connect') {
-      setHasOpenedConnect(true);
-    }
-  }, [activeTool]);
 
   const toggleMenu = () => {
     if (activeTool) {
@@ -23,7 +18,11 @@ const ToolsMenuWidget = ({ activePitchData, onPitchDetected, onAttackDetected, o
   };
 
   const openTool = (tool) => {
-    setActiveTool(activeTool === tool ? null : tool);
+    const nextTool = activeTool === tool ? null : tool;
+    setActiveTool(nextTool);
+    if (nextTool === 'connect') {
+      setHasOpenedConnect(true);
+    }
     setIsMenuOpen(false); // Close menu when opening a tool
   };
 

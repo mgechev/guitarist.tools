@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Button from './shared/Button';
 import styles from './TabDisplay.module.css';
 

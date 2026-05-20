@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { metronome } from '../utils/metronomeLogic';
 import Button from './shared/Button';
 import Select from './shared/Select';
@@ -10,11 +10,12 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
   const [beatsPerBar, setBeatsPerBar] = useState(4);
   const [subdivision, setSubdivision] = useState(1);
   const [visualTick, setVisualTick] = useState(null);
+  const [soundType, setSoundType] = useState('synth');
 
   const tapTimes = useRef([]);
 
   useEffect(() => {
-    metronome.onTick = (isAccent, isBeat, isSub) => {
+    metronome.onTick = (isAccent, isBeat) => {
       if (isAccent) setVisualTick('accent');
       else if (isBeat) setVisualTick('beat');
       else setVisualTick('sub');
@@ -51,6 +52,11 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
   const handleSubdivisionChange = (newSub) => {
     setSubdivision(newSub);
     metronome.setSubdivision(newSub);
+  };
+
+  const handleSoundTypeChange = (newType) => {
+    setSoundType(newType);
+    metronome.setSoundType(newType);
   };
 
   const handleTap = () => {
@@ -120,7 +126,7 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
             <div className={styles.settingsRow}>
               <Select label="Time" value={beatsPerBar} onChange={e => handleBeatsChange(parseInt(e.target.value))}>
                 {[2, 3, 4, 5, 6, 7, 8].map(b => (
-                  <option key={b} value={b}>{b}/4</option>
+                   <option key={b} value={b}>{b}/4</option>
                 ))}
               </Select>
 
@@ -129,6 +135,14 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
                 <option value={2}>1/8</option>
                 <option value={3}>1/8 T</option>
                 <option value={4}>1/16</option>
+              </Select>
+            </div>
+
+            <div className={styles.settingsRow}>
+              <Select label="Sound" value={soundType} onChange={e => handleSoundTypeChange(e.target.value)}>
+                <option value="synth">Synth</option>
+                <option value="woodblock">Woodblock</option>
+                <option value="cowbell">Cowbell</option>
               </Select>
             </div>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import styles from './Toggle.module.css';
 
 const Toggle = ({ id, checked, onChange, label, scale = 1, width = '44px', labelStyle = {} }) => {

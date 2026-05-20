@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { metronome } from '../utils/metronomeLogic';
 import { getSharedAudioContext } from '../utils/audioContext';
 import Button from './shared/Button';
@@ -11,11 +11,26 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
   const [feedback, setFeedback] = useState(''); // 'PERFECT', 'GOOD', 'MISS'
+  const [feedbackKey, setFeedbackKey] = useState(0);
   
   const targetTimesRef = useRef([]);
   const feedbackTimeoutRef = useRef(null);
   const gridRef = useRef(null);
   const playStartTimeRef = useRef(0);
+  const maxStreakRef = useRef(maxStreak);
+
+  useEffect(() => {
+    maxStreakRef.current = maxStreak;
+  }, [maxStreak]);
+
+  const showFeedback = (text) => {
+    setFeedback(text);
+    setFeedbackKey(k => k + 1);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    feedbackTimeoutRef.current = setTimeout(() => {
+      setFeedback('');
+    }, 500);
+  };
 
   // Configure metronome and start/stop
   const togglePlay = () => {
@@ -56,15 +71,15 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
     }
   };
 
-  // Change mode restarts tracking if playing
-  useEffect(() => {
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
     if (isPlaying) {
-      metronome.setSubdivision(mode === 'gallop' ? 4 : 2);
+      metronome.setSubdivision(newMode === 'gallop' ? 4 : 2);
       targetTimesRef.current = [];
       setStreak(0);
       setFeedback('');
     }
-  }, [mode]);
+  };
 
   // Tempo changes
   const handleTempoChange = (newTempo) => {
@@ -97,39 +112,47 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
 
       if (minDiff <= 0.06) { // 60ms window for PERFECT
         targets[closestIdx].hit = true;
-        showFeedback('PERFECT');
-        if (el) {
-          el.classList.remove(styles.stepHitPerfect, styles.stepHitGood);
-          void el.offsetWidth;
-          el.classList.add(styles.stepHitPerfect);
-        }
-        setStreak(s => {
-          const newStreak = s + 1;
-          if (newStreak > maxStreak) setMaxStreak(newStreak);
-          return newStreak;
-        });
+        setTimeout(() => {
+          showFeedback('PERFECT');
+          if (el) {
+            el.classList.remove(styles.stepHitPerfect, styles.stepHitGood);
+            void el.offsetWidth;
+            el.classList.add(styles.stepHitPerfect);
+          }
+          setStreak(s => {
+            const newStreak = s + 1;
+            if (newStreak > maxStreakRef.current) setMaxStreak(newStreak);
+            return newStreak;
+          });
+        }, 0);
       } else if (minDiff <= 0.12) { // 120ms window for GOOD
         targets[closestIdx].hit = true;
-        showFeedback('GOOD');
-        if (el) {
-          el.classList.remove(styles.stepHitPerfect, styles.stepHitGood);
-          void el.offsetWidth;
-          el.classList.add(styles.stepHitGood);
-        }
-        setStreak(s => {
-          const newStreak = s + 1;
-          if (newStreak > maxStreak) setMaxStreak(newStreak);
-          return newStreak;
-        });
+        setTimeout(() => {
+          showFeedback('GOOD');
+          if (el) {
+            el.classList.remove(styles.stepHitPerfect, styles.stepHitGood);
+            void el.offsetWidth;
+            el.classList.add(styles.stepHitGood);
+          }
+          setStreak(s => {
+            const newStreak = s + 1;
+            if (newStreak > maxStreakRef.current) setMaxStreak(newStreak);
+            return newStreak;
+          });
+        }, 0);
       } else {
         // They attacked but it was completely off-beat
-        showFeedback('MISS');
-        setStreak(0);
+        setTimeout(() => {
+          showFeedback('MISS');
+          setStreak(0);
+        }, 0);
       }
     } else {
       // No targets available but they attacked
-      showFeedback('MISS');
-      setStreak(0);
+      setTimeout(() => {
+        showFeedback('MISS');
+        setStreak(0);
+      }, 0);
     }
   }, [activeAttackTime, isPlaying]);
 
@@ -154,13 +177,6 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  const showFeedback = (text) => {
-    setFeedback(text);
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    feedbackTimeoutRef.current = setTimeout(() => {
-      setFeedback('');
-    }, 500);
-  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -226,13 +242,13 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
         <div className={styles.modeSelector}>
           <button 
             className={`${styles.modeBtn} ${mode === 'downpicking' ? styles.active : ''}`}
-            onClick={() => setMode('downpicking')}
+            onClick={() => handleModeChange('downpicking')}
           >
             Downpicking (8ths)
           </button>
           <button 
             className={`${styles.modeBtn} ${mode === 'gallop' ? styles.active : ''}`}
-            onClick={() => setMode('gallop')}
+            onClick={() => handleModeChange('gallop')}
           >
             Gallop (8th, 16th, 16th)
           </button>
@@ -270,9 +286,9 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
               
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <div className={styles.feedbackDisplay}>
-                  {feedback === 'PERFECT' && <span key={Date.now()} className={styles.feedbackPERFECT}>PERFECT</span>}
-                  {feedback === 'GOOD' && <span key={Date.now()} className={styles.feedbackGOOD}>GOOD</span>}
-                  {feedback === 'MISS' && <span key={Date.now()} className={styles.feedbackMISS}>MISS</span>}
+                  {feedback === 'PERFECT' && <span key={`perfect-${feedbackKey}`} className={styles.feedbackPERFECT}>PERFECT</span>}
+                  {feedback === 'GOOD' && <span key={`good-${feedbackKey}`} className={styles.feedbackGOOD}>GOOD</span>}
+                  {feedback === 'MISS' && <span key={`miss-${feedbackKey}`} className={styles.feedbackMISS}>MISS</span>}
                 </div>
               </div>
 
@@ -293,7 +309,7 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
             <input 
               type="range" 
               min="30" 
-              max="240" 
+              max="300" 
               value={tempo} 
               onChange={(e) => handleTempoChange(parseInt(e.target.value))}
             />

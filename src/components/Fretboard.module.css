@@ -48,3 +48,40 @@
   border-color: #b91c1c !important;
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.6) !important;
 }
+
+.fretboardOuter {
+  position: relative;
+  width: 100%;
+}
+
+.fretboardOuter::before,
+.fretboardOuter::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 1rem;
+  width: 50px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fretboardOuter::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-color), transparent);
+}
+
+.fretboardOuter::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-color), transparent);
+}
+
+.fretboardOuter.showLeftFade::before {
+  opacity: 1;
+}
+
+.fretboardOuter.showRightFade::after {
+  opacity: 1;
+}
+

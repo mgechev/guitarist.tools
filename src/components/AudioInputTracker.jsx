@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PitchDetector } from 'pitchy';
 import { getSharedAudioContext } from '../utils/audioContext';
-import { NOTES } from '../utils/musicLogic';
 import Toggle from './shared/Toggle';
 import styles from './AudioInputTracker.module.css';
 
