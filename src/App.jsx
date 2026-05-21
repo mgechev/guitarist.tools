@@ -4,6 +4,7 @@ import ExploreMode from './components/ExploreMode';
 import PracticeMode from './components/PracticeMode';
 import PlayMode from './components/PlayMode';
 import RhythmMode from './components/RhythmMode';
+import LegatoMode from './components/LegatoMode';
 import SideNav from './components/SideNav';
 import ToolsMenuWidget from './components/ToolsMenuWidget';
 import './index.css';
@@ -13,6 +14,7 @@ function App() {
   const location = useLocation();
   const isPlayMode = location.pathname.startsWith('/play');
   const isRhythmMode = location.pathname.startsWith('/rhythm');
+  const isLegatoMode = location.pathname.startsWith('/legato');
   const [keyIndex, setKeyIndex] = useState(0); // C
   const [isMinor, setIsMinor] = useState(false); // Major
   const [shape, setShape] = useState('C');
@@ -28,7 +30,7 @@ function App() {
         <div className={styles.appContainer}>
           <header className={`${styles.appHeader} glass-panel`}>
         <div className={styles.logo}>
-          <h1>{isPlayMode ? 'Play' : isRhythmMode ? 'Rhythm' : 'CAGED'}</h1>
+          <h1>{isPlayMode ? 'Play' : isRhythmMode ? 'Rhythm' : isLegatoMode ? 'Legato' : 'CAGED'}</h1>
         </div>
         {isPlayMode && (
           <nav className={styles.tabs}>
@@ -47,7 +49,7 @@ function App() {
           </nav>
         )}
         
-        {(!isPlayMode && !isRhythmMode) && (
+        {(!isPlayMode && !isRhythmMode && !isLegatoMode) && (
           <nav className={styles.tabs}>
             <NavLink 
               to="/explore"
@@ -76,6 +78,7 @@ function App() {
           } />
           <Route path="/practice" element={<PracticeMode activePitchData={activePitchData} isGuitarConnected={isGuitarConnected} />} />
           <Route path="/rhythm" element={<RhythmMode activeAttackTime={activeAttackTime} isGuitarConnected={isGuitarConnected} />} />
+          <Route path="/legato" element={<LegatoMode activePitchData={activePitchData} activeAttackTime={activeAttackTime} activeAudioData={activeAudioData} isGuitarConnected={isGuitarConnected} />} />
           <Route path="/play/*" element={<PlayMode activePitchData={activePitchData} activeAttackTime={activeAttackTime} activeAudioData={activeAudioData} />} />
           <Route path="*" element={<Navigate to="/explore" replace />} />
         </Routes>

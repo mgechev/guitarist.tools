@@ -4,7 +4,7 @@ import { getSharedAudioContext } from '../utils/audioContext';
 import Toggle from './shared/Toggle';
 import styles from './AudioInputTracker.module.css';
 
-const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetected, onAudioData }) => {
+const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetected, onAudioData, visible = false }) => {
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [isTracking, setIsTracking] = useState(false);
@@ -17,32 +17,6 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
   const streamRef = useRef(null);
   const requestRef = useRef(null);
 
-  // Enumerate devices on mount
-  useEffect(() => {
-    const getDevices = async () => {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true }); // Request permission first
-        const allDevices = await navigator.mediaDevices.enumerateDevices();
-        const audioInputs = allDevices.filter(device => device.kind === 'audioinput');
-        setDevices(audioInputs);
-        if (audioInputs.length > 0) {
-          setSelectedDeviceId(audioInputs[0].deviceId);
-        }
-      } catch (err) {
-        console.error('Error enumerating devices:', err);
-      }
-    };
-    getDevices();
-
-    // Cleanup on unmount
-    return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
-      // Do not close the shared audio context
-      if (monitorGainNodeRef.current) monitorGainNodeRef.current.disconnect();
-    };
-  }, []);
-
   const noiseGateRef = useRef(noiseGate);
   useEffect(() => {
     noiseGateRef.current = noiseGate;
@@ -50,8 +24,9 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
 
   const prevRmsRef = useRef(0);
   
-  const startTracking = async () => {
-    if (!selectedDeviceId) return;
+  const startTracking = async (overrideDeviceId, overrideDeviceLabel) => {
+    const deviceId = (overrideDeviceId && typeof overrideDeviceId === 'string') ? overrideDeviceId : selectedDeviceId;
+    if (!deviceId) return;
     
     // iOS Safari requires AudioContext to be resumed synchronously inside a user gesture.
     // We must do this before awaiting the media stream!
@@ -62,14 +37,27 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
     audioContextRef.current = audioContext;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          deviceId: { exact: selectedDeviceId },
-          echoCancellation: false,
-          autoGainControl: false,
-          noiseSuppression: false
-        }
-      });
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: { exact: deviceId },
+            echoCancellation: false,
+            autoGainControl: false,
+            noiseSuppression: false
+          }
+        });
+      } catch (exactErr) {
+        console.warn("FretMaster exact device constraint failed, falling back to ideal:", exactErr);
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: { ideal: deviceId },
+            echoCancellation: false,
+            autoGainControl: false,
+            noiseSuppression: false
+          }
+        });
+      }
       streamRef.current = stream;
 
       const analyserNode = audioContext.createAnalyser();
@@ -110,7 +98,7 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
           // Attack detection logic: sharp volume spike
           if (rms > prevRmsRef.current * 1.5 && rms > noiseGateRef.current + 0.01) {
             const now = audioContext.currentTime;
-            if (now - lastAttackTime > 0.08) { // 80ms debounce
+            if (now - lastAttackTime > 0.035) { // 35ms debounce for high-speed picking
               lastAttackTime = now;
               if (onAttackDetected) {
                 onAttackDetected(now);
@@ -143,6 +131,14 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
 
       setIsTracking(true);
       if (onConnectionChange) onConnectionChange(true);
+      localStorage.setItem('fretmaster_auto_connect', 'true');
+      localStorage.setItem('fretmaster_device_id', deviceId);
+      
+      const label = overrideDeviceLabel || devices.find(d => d.deviceId === deviceId)?.label;
+      if (label) {
+        localStorage.setItem('fretmaster_device_label', label);
+      }
+      
       updatePitch();
 
     } catch (err) {
@@ -172,8 +168,101 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
     }
     setIsTracking(false);
     if (onConnectionChange) onConnectionChange(false);
+    localStorage.setItem('fretmaster_auto_connect', 'false');
     onPitchDetected(null);
   };
+
+  // Enumerate devices on mount and auto-connect
+  useEffect(() => {
+    const resumeOnInteraction = () => {
+      const audioContext = audioContextRef.current || getSharedAudioContext();
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+          console.log("FretMaster AudioContext successfully resumed via user interaction.");
+        }).catch(err => {
+          console.error("FretMaster failed to resume AudioContext on interaction:", err);
+        });
+      }
+      // Remove after first interaction
+      window.removeEventListener('click', resumeOnInteraction);
+      window.removeEventListener('keydown', resumeOnInteraction);
+      window.removeEventListener('touchstart', resumeOnInteraction);
+    };
+
+    window.addEventListener('click', resumeOnInteraction);
+    window.addEventListener('keydown', resumeOnInteraction);
+    window.addEventListener('touchstart', resumeOnInteraction);
+
+    const getDevices = async () => {
+      try {
+        const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true }); // Request permission first
+        tempStream.getTracks().forEach(track => track.stop()); // Stop the temp stream immediately to release the mic
+
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = allDevices.filter(device => device.kind === 'audioinput');
+        setDevices(audioInputs);
+        if (audioInputs.length > 0) {
+          const storedDeviceId = localStorage.getItem('fretmaster_device_id');
+          const storedDeviceLabel = localStorage.getItem('fretmaster_device_label');
+
+          console.log("FretMaster Audio Inputs available on load:", audioInputs.map(d => ({ label: d.label, deviceId: d.deviceId })));
+          console.log("FretMaster Stored Auto-Connect info:", { storedDeviceId, storedDeviceLabel });
+
+          let matchedDevice = audioInputs.find(d => d.deviceId === storedDeviceId);
+          if (!matchedDevice && storedDeviceLabel) {
+            const getCleanLabel = (str) => {
+              return str.replace(/default\s*-\s*/gi, '')
+                        .replace(/default/gi, '')
+                        .trim()
+                        .toLowerCase();
+            };
+
+            const cleanStored = getCleanLabel(storedDeviceLabel);
+            if (cleanStored) {
+              // 1. Try exact match of cleaned labels
+              matchedDevice = audioInputs.find(d => getCleanLabel(d.label) === cleanStored);
+              
+              // 2. Try substring match of cleaned labels
+              if (!matchedDevice) {
+                matchedDevice = audioInputs.find(d => {
+                  const cleanLabel = getCleanLabel(d.label);
+                  return cleanLabel && (cleanLabel.includes(cleanStored) || cleanStored.includes(cleanLabel));
+                });
+              }
+            }
+          }
+
+          const targetDevice = matchedDevice || audioInputs[0];
+          console.log("FretMaster Auto-Connect resolved target device:", targetDevice.label, "ID:", targetDevice.deviceId);
+          setSelectedDeviceId(targetDevice.deviceId);
+
+          const autoConnect = localStorage.getItem('fretmaster_auto_connect') === 'true';
+          if (autoConnect) {
+            startTracking(targetDevice.deviceId, targetDevice.label);
+          }
+        }
+      } catch (err) {
+        console.error('Error enumerating devices:', err);
+      }
+    };
+    getDevices();
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('click', resumeOnInteraction);
+      window.removeEventListener('keydown', resumeOnInteraction);
+      window.removeEventListener('touchstart', resumeOnInteraction);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      if (streamRef.current) streamRef.current.getTracks().forEach(track => track.stop());
+      // Do not close the shared audio context
+      if (monitorGainNodeRef.current) monitorGainNodeRef.current.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <div className={styles.audioTrackerControls}>

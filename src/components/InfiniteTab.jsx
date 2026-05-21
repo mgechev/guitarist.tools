@@ -22,8 +22,8 @@ const InfiniteTab = ({ activePitchData }) => {
     }
 
     let timeoutId;
-    // Only add it once exactly when count hits 3
-    if (consecutiveNoteRef.current.count === 3) {
+    // Only add it once exactly when count hits 2
+    if (consecutiveNoteRef.current.count === 2) {
       const position = getTabPosition(midiNote);
       if (position) {
         timeoutId = setTimeout(() => {

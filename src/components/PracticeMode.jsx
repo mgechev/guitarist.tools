@@ -30,6 +30,7 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
   useEffect(() => { challengeRef.current = challenge; }, [challenge]);
 
   const consecutiveNoteRef = useRef({ note: null, count: 0 });
+  const nullFramesCountRef = useRef(0);
 
   const pickRandom = () => {
     if (allowedKeys.length === 0 || allowedScales.length === 0) {
@@ -130,14 +131,19 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
   useEffect(() => {
     if (!isGuitarConnected || !challenge || showAnswer) {
       consecutiveNoteRef.current = { note: null, count: 0 };
+      nullFramesCountRef.current = 0;
       return;
     }
 
     if (!activePitchData) {
-      consecutiveNoteRef.current = { note: null, count: 0 };
+      nullFramesCountRef.current += 1;
+      if (nullFramesCountRef.current > 2) {
+        consecutiveNoteRef.current = { note: null, count: 0 };
+      }
       return;
     }
 
+    nullFramesCountRef.current = 0;
     const midiNote = activePitchData.midiNote;
     
     // Calculate the absolute bounds of the current challenge
@@ -159,14 +165,14 @@ const PracticeMode = ({ activePitchData, isGuitarConnected }) => {
       }
     }
     
-    // Debounce: require note to be detected for 5 consecutive frames
+    // Debounce: require note to be detected for 2 consecutive frames
     if (consecutiveNoteRef.current.note === midiNote) {
       consecutiveNoteRef.current.count += 1;
     } else {
       consecutiveNoteRef.current = { note: midiNote, count: 1 };
     }
 
-    if (consecutiveNoteRef.current.count < 5) {
+    if (consecutiveNoteRef.current.count < 2) {
       return; // Not held long enough yet
     }
 

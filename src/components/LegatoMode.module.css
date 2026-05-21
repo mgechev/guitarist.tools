@@ -1,0 +1,332 @@
+.legatoLayout {
+  display: flex;
+  gap: 2rem;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 1rem;
+}
+
+.leftCol {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 320px;
+}
+
+.rightCol {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 400px;
+}
+
+.infoPanel, .dashboardPanel {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.subtext {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.exerciseSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.exerciseSelector h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.exerciseList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.exerciseCard {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: inherit;
+  font-family: inherit;
+}
+
+.exerciseCard:hover {
+  background: var(--surface-color);
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.activeCard {
+  border-color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: var(--pentatonic-glow);
+}
+
+:global(.light-mode) .activeCard {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.exerciseCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.exerciseCardHeader span {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.exerciseCard h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.exerciseCard p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.headerRow h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.statsContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.statBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.statVal {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.trainerConsole {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.noteDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--surface-color);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.pitchName {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.pitchDetails {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.sequenceFlow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.stepBubble {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  min-width: 100px;
+  transition: all 0.2s ease;
+}
+
+.stepLabel {
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.stepDesc {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.stepActive {
+  border-color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.stepSuccess {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.stepSuccess .stepLabel {
+  color: #10b981;
+}
+
+.stepFailed {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.stepFailed .stepLabel {
+  color: #ef4444;
+}
+
+.feedbackConsole {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  width: 100%;
+  border: 1px solid transparent;
+}
+
+.feedbackConsole p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.info {
+  background: var(--surface-color);
+  border-color: var(--border-color);
+}
+
+.success {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.warning {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.sustainContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sustainHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.sustainBarBg {
+  position: relative;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sustainBarFill {
+  height: 100%;
+  background: linear-gradient(to right, #6366f1, #a855f7);
+  border-radius: 4px;
+  transition: width 0.08s linear;
+}
+
+.sustainThresholdLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--text-primary);
+  opacity: 0.4;
+}
+
+.sustainWarning {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .legatoLayout {
+    flex-direction: column;
+  }
+}
