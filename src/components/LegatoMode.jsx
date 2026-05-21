@@ -24,6 +24,26 @@ const EXERCISES = [
     ]
   },
   {
+    id: 'ascending-run',
+    name: 'Ascending Legato Run',
+    description: 'Pluck the first note, then hammer-on twice consecutively to higher notes. Essential for building 3-note-per-string speed.',
+    steps: [
+      { type: 'pick', label: '1. PLUCK', instruction: 'Pluck starting note' },
+      { type: 'legato', label: '2. HAMMER 1', direction: 'up', instruction: 'Hammer-on to a HIGHER note' },
+      { type: 'legato', label: '3. HAMMER 2', direction: 'up', instruction: 'Hammer-on to another HIGHER note' }
+    ]
+  },
+  {
+    id: 'descending-run',
+    name: 'Descending Legato Run',
+    description: 'Pluck the first high note, then pull-off twice consecutively to lower frets. Build speed on descending scales.',
+    steps: [
+      { type: 'pick', label: '1. PLUCK', instruction: 'Pluck high starting note' },
+      { type: 'legato', label: '2. PULL 1', direction: 'down', instruction: 'Pull-off to a LOWER note' },
+      { type: 'legato', label: '3. PULL 2', direction: 'down', instruction: 'Pull-off to another LOWER note' }
+    ]
+  },
+  {
     id: 'trill',
     name: 'Trill Master',
     description: 'Pluck the first note, then alternate rapidly between a higher and lower note using only hammer-ons and pull-offs in a continuous sequence.',
@@ -32,6 +52,18 @@ const EXERCISES = [
       { type: 'legato', label: '2. HAMMER', direction: 'up', instruction: 'Hammer-on up' },
       { type: 'legato', label: '3. PULL', direction: 'down', instruction: 'Pull-off down' },
       { type: 'legato', label: '4. HAMMER', direction: 'up', instruction: 'Hammer-on up' }
+    ]
+  },
+  {
+    id: 'satriani-pivot',
+    name: 'Satriani Legato Pivot',
+    description: 'Pluck once, hammer up twice consecutively, then pull-off twice back down. A classic finger independence and pivot stamina drill.',
+    steps: [
+      { type: 'pick', label: '1. PLUCK', instruction: 'Pluck starting note' },
+      { type: 'legato', label: '2. HAMMER 1', direction: 'up', instruction: 'Hammer-on up' },
+      { type: 'legato', label: '3. HAMMER 2', direction: 'up', instruction: 'Hammer-on further up' },
+      { type: 'legato', label: '4. PULL 1', direction: 'down', instruction: 'Pull-off down' },
+      { type: 'legato', label: '5. PULL 2', direction: 'down', instruction: 'Pull-off further down' }
     ]
   }
 ];
@@ -268,7 +300,9 @@ const LegatoMode = ({ activePitchData, activeAttackTime, activeAudioData, isGuit
                 >
                   <div className={styles.exerciseCardHeader}>
                     <span className="material-symbols-outlined">
-                      {ex.id === 'hammer-on' ? 'keyboard_double_arrow_up' : ex.id === 'pull-off' ? 'keyboard_double_arrow_down' : 'sync'}
+                      {ex.id === 'hammer-on' || ex.id === 'ascending-run' ? 'keyboard_double_arrow_up' : 
+                       ex.id === 'pull-off' || ex.id === 'descending-run' ? 'keyboard_double_arrow_down' : 
+                       ex.id === 'trill' ? 'sync' : 'unfold_more'}
                     </span>
                     <h4>{ex.name}</h4>
                   </div>
@@ -347,9 +381,9 @@ const LegatoMode = ({ activePitchData, activeAttackTime, activeAudioData, isGuit
                 {/* Sustain threshold line */}
                 <div className={styles.sustainThresholdLine} style={{ left: '15%' }} title="Target Legato Volume" />
               </div>
-              {rms > 0 && rms < 0.03 && (
-                <p className={styles.sustainWarning}>Sustain dropping! Keep your fingers pressing firmly.</p>
-              )}
+              <p className={`${styles.sustainWarning} ${rms > 0 && rms < 0.03 ? styles.show : ''}`}>
+                Sustain dropping! Keep your fingers pressing firmly.
+              </p>
             </div>
           </div>
         </div>
