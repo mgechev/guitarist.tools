@@ -1,21 +1,43 @@
 import { useEffect, useRef, useState } from 'react';
+import { NOTES } from '../utils/musicLogic';
 import styles from './Visualizer.module.css';
 
-const BAR_WIDTH = 6;
-const GAP = 2;
-const DOT_RADIUS = 2;
-const DOT_SPACING = 8; // Vertical space between dots
+const NUM_PARTICLES = 80;
 
-const Visualizer = ({ activeAttackTime, activeAudioData }) => {
+const createParticle = (baseDistance) => {
+  const angle = Math.random() * Math.PI * 2;
+  const radialDistance = baseDistance + Math.random() * 90;
+  return {
+    angle,
+    radialDistance,
+    baseRadius: radialDistance,
+    x: 0,
+    y: 0,
+    size: 1.2 + Math.random() * 2.5,
+    speed: 0.003 + Math.random() * 0.008,
+    opacity: 0.3 + Math.random() * 0.5,
+    // Complementary colors: violet/magenta or teal/cyan
+    hue: Math.random() > 0.5 ? 270 + Math.random() * 50 : 170 + Math.random() * 50,
+    state: 'orbit',
+    vx: 0,
+    vy: 0,
+    life: 1.0,
+    decay: 0.01 + Math.random() * 0.015
+  };
+};
+
+const Visualizer = ({ activePitchData, activeAttackTime, activeAudioData }) => {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
+  
   const audioDataRef = useRef(null);
-  const hasStartedRef = useRef(false);
+  const pitchDataRef = useRef(null);
   const shockwaveTriggerRef = useRef(false);
+  const hasStartedRef = useRef(false);
   const [hasData, setHasData] = useState(false);
 
-  // Trigger shockwave on attacks (chords/strums)
+  // Sync incoming props to refs to avoid effect re-binding
   useEffect(() => {
     if (activeAttackTime) {
       shockwaveTriggerRef.current = true;
@@ -26,22 +48,24 @@ const Visualizer = ({ activeAttackTime, activeAudioData }) => {
     }
   }, [activeAttackTime]);
 
-  // Keep a reference to the latest audio data so the animation loop can access it
   useEffect(() => {
     audioDataRef.current = activeAudioData;
+    pitchDataRef.current = activePitchData;
     if (activeAudioData && !hasStartedRef.current) {
-      // Check if there is actual sound (not just pure silence array of 0s)
       const hasSound = activeAudioData.some(val => val > 10);
       if (hasSound) {
         hasStartedRef.current = true;
         setTimeout(() => setHasData(true), 0);
       }
     }
-  }, [activeAudioData]);
+  }, [activeAudioData, activePitchData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     let width = 0;
     let height = 0;
 
@@ -49,7 +73,6 @@ const Visualizer = ({ activeAttackTime, activeAudioData }) => {
       if (containerRef.current) {
         width = containerRef.current.clientWidth;
         height = containerRef.current.clientHeight;
-        // Use devicePixelRatio for sharp rendering
         const dpr = window.devicePixelRatio || 1;
         canvas.width = width * dpr;
         canvas.height = height * dpr;
@@ -60,114 +83,179 @@ const Visualizer = ({ activeAttackTime, activeAudioData }) => {
     resize();
     window.addEventListener('resize', resize);
 
-    // Keep an array of smoothed bar values to allow smooth decay
-    let barHeights = [];
+    // Initialize particles
+    const baseDistance = Math.min(width, height) * 0.16;
+    const particles = Array.from({ length: NUM_PARTICLES }, () => createParticle(baseDistance));
+
+    // Smoothly interpolated values to prevent visual pops
+    let smoothedRms = 0;
+
+    const drawWarpedRing = (cx, cy, baseRadius, data, minIndex, maxIndex, color1, color2, rms) => {
+      ctx.beginPath();
+      const numPoints = 100;
+      const points = [];
+      const dataLen = maxIndex - minIndex;
+      
+      for (let i = 0; i < numPoints; i++) {
+        // Sample corresponding FFT bins
+        const sampleIdx = minIndex + Math.floor((i % (numPoints / 2)) / (numPoints / 2) * dataLen);
+        const val = data ? (data[sampleIdx] || 0) : 0;
+        const normalized = val / 255;
+        
+        // Dynamic radial warp based on frequency magnitude
+        const warpAmount = Math.pow(normalized, 1.3) * 75 * (0.3 + rms * 0.7);
+        const r = baseRadius + warpAmount;
+        
+        const angle = (i / numPoints) * Math.PI * 2;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        points.push({ x, y });
+      }
+      
+      // Connect points smoothly via quadratic midpoints
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 0; i < numPoints; i++) {
+        const next = points[(i + 1) % numPoints];
+        const xc = (points[i].x + next.x) / 2;
+        const yc = (points[i].y + next.y) / 2;
+        ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+      }
+      ctx.closePath();
+      
+      const grad = ctx.createRadialGradient(cx, cy, baseRadius * 0.6, cx, cy, baseRadius * 1.8);
+      grad.addColorStop(0, color1);
+      grad.addColorStop(1, color2);
+      
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 3.5 + rms * 4;
+      ctx.shadowBlur = 8 + rms * 12;
+      ctx.shadowColor = color1;
+      ctx.stroke();
+    };
 
     const render = () => {
-      // Clear canvas completely to allow CSS light/dark mode background to show through.
-      // Reset shadow blur to 0 before clearing to prevent previous frame's shadow from bleeding into the clear.
+      // Clear canvas cleanly
       ctx.shadowBlur = 0;
       ctx.clearRect(0, 0, width, height);
 
       const data = audioDataRef.current;
+      const pitchInfo = pitchDataRef.current;
       
-      // Calculate how many bars fit horizontally
-      const numBars = Math.max(10, Math.floor(width / (BAR_WIDTH + GAP)));
-      
-      // Initialize or resize smoothed array
-      if (barHeights.length !== numBars) {
-        barHeights = new Array(numBars).fill(0);
-      }
+      // Detect theme dynamically for contrast settings
+      const isLightMode = document.documentElement.classList.contains('light-mode');
 
+      // Calculate relative RMS amplitude from the audio spectral data
+      let sumSquares = 0;
+      if (data) {
+        const checkLen = Math.min(data.length, 300);
+        for (let i = 0; i < checkLen; i++) {
+          const val = data[i] / 255;
+          sumSquares += val * val;
+        }
+      }
+      const targetRms = Math.sqrt(sumSquares / 300);
+      smoothedRms = smoothedRms * 0.85 + targetRms * 0.15;
+
+      const cx = width / 2;
+      const cy = height / 2;
+      
+      // Dynamic center orb radius
+      const baseRadius = Math.min(width, height) * 0.15;
+      const orbRadius = baseRadius * (1.0 + smoothedRms * 0.4);
+
+      // Handle attack trigger for particles
       let isShockwave = false;
       if (shockwaveTriggerRef.current) {
         isShockwave = true;
         shockwaveTriggerRef.current = false;
       }
 
-      // Calculate target heights
-      const targetHeights = new Array(numBars).fill(0);
-      
-      if (isShockwave) {
-        for (let i = 0; i < numBars; i++) {
-          targetHeights[i] = 0.5 + Math.random() * 0.5; 
-        }
-      } else if (data) {
-        // Map FFT bins to bars. Use first ~300 bins for relevant guitar frequencies.
-        const binsToUse = Math.min(300, data.length);
-        const binsPerBar = binsToUse / numBars;
-        
-        for (let i = 0; i < numBars; i++) {
-          let sum = 0;
-          const startIndex = Math.floor(i * binsPerBar);
-          const endIndex = Math.floor((i + 1) * binsPerBar);
-          
-          for (let j = startIndex; j < endIndex; j++) {
-            sum += data[j];
-          }
-          const avg = sum / (endIndex - startIndex || 1);
-          
-          // Scale and add dynamic curve
-          const normalized = avg / 255;
-          targetHeights[i] = Math.pow(normalized, 1.5) * 1.5;
-        }
+      // 1. Draw central glowing orb
+      const orbGrad = ctx.createRadialGradient(cx, cy, orbRadius * 0.1, cx, cy, orbRadius);
+      if (isLightMode) {
+        orbGrad.addColorStop(0, 'rgba(124, 58, 237, 0.12)'); // Violet soft
+        orbGrad.addColorStop(0.5, 'rgba(236, 72, 153, 0.06)'); // Pink soft
+        orbGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      } else {
+        orbGrad.addColorStop(0, 'rgba(139, 92, 246, 0.28)'); // Violet glow
+        orbGrad.addColorStop(0.5, 'rgba(244, 63, 94, 0.12)'); // Rose glow
+        orbGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       }
 
-      // Smooth decay logic
-      for (let i = 0; i < numBars; i++) {
-        if (targetHeights[i] > barHeights[i]) {
-          // Fast attack
-          barHeights[i] = targetHeights[i];
+      ctx.fillStyle = orbGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, orbRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Draw warped circular rings (bass & treble)
+      // Inner Ring (Bass/Mid, bins 5 to 60)
+      const colorInner = isLightMode ? 'rgba(219, 39, 119, 0.85)' : '#ec4899'; // Deep pink
+      const colorInnerGrad = isLightMode ? 'rgba(79, 70, 229, 0.4)' : 'rgba(99, 102, 241, 0.2)'; // Indigo
+      drawWarpedRing(cx, cy, baseRadius, data, 5, 60, colorInner, colorInnerGrad, smoothedRms);
+
+      // Outer Ring (Treble, bins 60 to 180)
+      const colorOuter = isLightMode ? 'rgba(13, 148, 136, 0.85)' : '#14b8a6'; // Teal
+      const colorOuterGrad = isLightMode ? 'rgba(30, 41, 59, 0.1)' : 'rgba(255, 255, 255, 0.05)';
+      drawWarpedRing(cx, cy, baseRadius * 1.35, data, 60, 180, colorOuter, colorOuterGrad, smoothedRms);
+
+      // 3. Update & Draw orbital particle vortex
+      particles.forEach(p => {
+        if (isShockwave) {
+          p.state = 'explode';
+          const speed = 4 + Math.random() * 8;
+          p.vx = Math.cos(p.angle) * speed;
+          p.vy = Math.sin(p.angle) * speed;
+          p.life = 1.0;
+          p.opacity = 0.95;
+        }
+
+        if (p.state === 'explode') {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.94;
+          p.vy *= 0.94;
+          p.life -= p.decay;
+          p.opacity = p.life * 0.95;
+
+          if (p.life <= 0) {
+            p.state = 'orbit';
+            p.angle = Math.random() * Math.PI * 2;
+            p.radialDistance = p.baseRadius;
+            p.opacity = 0.2 + Math.random() * 0.6;
+          }
         } else {
-          // Smooth decay
-          barHeights[i] -= 0.03;
-          if (barHeights[i] < 0) barHeights[i] = 0;
+          p.angle += p.speed * (1.0 + smoothedRms * 3.5);
+          const currentDistance = p.radialDistance + smoothedRms * 40 * Math.sin(p.angle * 2.5);
+          p.x = Math.cos(p.angle) * currentDistance;
+          p.y = Math.sin(p.angle) * currentDistance;
         }
+
+        ctx.fillStyle = `hsla(${p.hue}, 100%, ${isLightMode ? '45%' : '65%'}, ${p.opacity})`;
+        ctx.shadowBlur = isLightMode ? 2 : 6;
+        ctx.shadowColor = `hsl(${p.hue}, 100%, ${isLightMode ? '45%' : '65%'})`;
+        ctx.beginPath();
+        ctx.arc(cx + p.x, cy + p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 4. Draw central note display text
+      if (pitchInfo) {
+        const noteName = NOTES[pitchInfo.midiNote % 12];
+        ctx.shadowBlur = isLightMode ? 3 : 15;
+        ctx.shadowColor = isLightMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)';
+        ctx.fillStyle = isLightMode ? '#111827' : '#ffffff';
+        ctx.font = '900 48px "Playfair Display", serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(noteName, cx, cy);
+      } else {
+        // Draw elegant idle pulse center
+        ctx.fillStyle = isLightMode ? 'rgba(17, 24, 39, 0.3)' : 'rgba(255, 255, 255, 0.3)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5 + Math.sin(Date.now() / 250) * 2, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      const cy = height / 2;
-      const maxPossibleHeight = height / 2.5;
-
-      // Draw the linear dotted bars
-      for (let i = 0; i < numBars; i++) {
-        // Center the entire block of bars horizontally
-        const totalBarsWidth = numBars * (BAR_WIDTH + GAP);
-        const xOffset = (width - totalBarsWidth) / 2;
-        const x = xOffset + i * (BAR_WIDTH + GAP) + (BAR_WIDTH / 2);
-        
-        const amplitude = barHeights[i];
-        
-        // Ensure at least 1 dot for idle state
-        let numDots = Math.max(1, Math.floor((amplitude * maxPossibleHeight) / DOT_SPACING));
-        
-        // Map color ratio: 0 to 1 across the width
-        const ratio = i / numBars;
-        
-        // From left to right: Blue (240) -> Purple/Pink (300) -> Red (0) -> Yellow (60) -> Green (120)
-        // Total hue range covered: 240 degrees (240 + 240 = 480. 480 % 360 = 120)
-        const hue = (240 + ratio * 240) % 360;
-        
-        ctx.fillStyle = `hsl(${hue}, 100%, 60%)`;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
-
-        for (let j = 0; j < numDots; j++) {
-          const yDist = j * DOT_SPACING;
-          
-          // Draw top dot
-          ctx.beginPath();
-          ctx.arc(x, cy - yDist, DOT_RADIUS, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Draw bottom dot (skip drawing the exact center dot twice)
-          if (j > 0) {
-            ctx.beginPath();
-            ctx.arc(x, cy + yDist, DOT_RADIUS, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      }
-      
       requestRef.current = requestAnimationFrame(render);
     };
 
