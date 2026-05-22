@@ -1,0 +1,732 @@
+.bluesCoachContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.coachHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.coachHeader h2 {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(0, 198, 255, 0.1);
+}
+
+.topControlRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.optionBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 250px;
+}
+
+.optionLabel {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.keyButtonGroup {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.keyBtn {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyBtn:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.activeKey {
+  background: #00c6ff;
+  color: #000000;
+  border-color: #00c6ff;
+  box-shadow: 0 0 15px rgba(0, 198, 255, 0.4);
+}
+
+.randomKeyBtn {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  padding: 0 1rem;
+  height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.randomKeyBtn:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.rhythmSelectGroup {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.rhythmBtn {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  padding: 0.75rem 1rem;
+  flex: 1;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.rhythmBtn:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.activeRhythm {
+  background: #0072ff;
+  color: #ffffff;
+  border-color: #0072ff;
+  box-shadow: 0 0 15px rgba(0, 114, 255, 0.4);
+}
+
+.patternDescription {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* 12-Bar Progression Matrix */
+.progressionMatrix {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .progressionMatrix {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.progressionBar {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--panel-border);
+  padding: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  transition: all 0.3s ease;
+}
+
+.activeProgressionBar {
+  background: rgba(0, 198, 255, 0.08);
+  border-color: #00c6ff;
+  box-shadow: inset 0 0 10px rgba(0, 198, 255, 0.2);
+}
+
+.barNumber {
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.chordDegreeLabel {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chordNameLabel {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+  font-weight: 500;
+}
+
+.visualBarProgress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.barProgressFill {
+  height: 100%;
+  background: #00c6ff;
+  box-shadow: 0 0 8px #00c6ff;
+  transition: width 0.1s linear;
+}
+
+/* Strumming Sequencer */
+.sequencerContainer {
+  margin: 1rem 0;
+}
+
+.sequencerGrid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border: 1px solid var(--panel-border);
+}
+
+.sequencerStep {
+  height: 60px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  transition: background-color 0.1s ease;
+  position: relative;
+}
+
+/* Grouping ticks of triplets (every 3) */
+.sequencerStep:nth-child(3n) {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+.sequencerStep:last-child {
+  border-right: none;
+}
+
+.targetSeqStep {
+  background: rgba(0, 114, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 114, 255, 0.25);
+  color: var(--text-primary);
+}
+
+.activeSeqStep {
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  transform: scale(1.04);
+  z-index: 10;
+  color: #000000 !important;
+}
+
+.seqArrow {
+  font-size: 1.1rem;
+}
+
+.seqLabel {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+/* Stats */
+.statsPanel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.5rem 0;
+  background: rgba(255, 255, 255, 0.01);
+  padding: 1rem 2rem;
+  border: 1px solid var(--panel-border);
+}
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.statCellLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.statCellVal {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.accuracyMeter {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.feedbackDisplay {
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.feedbackPERFECT {
+  color: #88ff5a;
+  text-shadow: 0 0 20px rgba(136, 255, 90, 0.6);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.feedbackGOOD {
+  color: #fcff42;
+  text-shadow: 0 0 20px rgba(252, 255, 66, 0.6);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.feedbackMISS {
+  color: #ff5e7e;
+  text-shadow: 0 0 20px rgba(255, 94, 126, 0.6);
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.6); opacity: 0; }
+  80% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+  40%, 60% { transform: translate3d(3px, 0, 0); }
+}
+
+/* Controls */
+.rhythmDashboardControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.tempoControl {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tempoControl input {
+  width: 100%;
+  accent-color: #00c6ff;
+}
+
+.backingTrackControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .backingTrackControls {
+    align-items: stretch;
+    width: 100%;
+  }
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxLabel input {
+  accent-color: #00c6ff;
+}
+
+/* Fretboard Coach */
+.liveDetectedNote {
+  background: rgba(0, 198, 255, 0.12);
+  border: 1px solid #00c6ff;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.fretboardLegend {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 1.25rem 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legendIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.fretboardWrapper {
+  overflow-x: auto;
+  width: 100%;
+  background: var(--fretboard-bg);
+  border: 1px solid var(--panel-border);
+  padding: 1.5rem 0.5rem;
+  margin-top: 1rem;
+}
+
+.fretboard {
+  position: relative;
+  height: 180px;
+  min-width: 800px;
+}
+
+.fretWire {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--fret-wire);
+  z-index: 2;
+}
+
+.nutWire {
+  width: 8px;
+  background: #aaa;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.fretNumberLabel {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.fretDot {
+  position: absolute;
+  left: -20px; /* Center dot between frets (approximated position) */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fret-dot-color);
+  z-index: 1;
+}
+
+/* Double dots on 12th fret */
+.fretDotDouble {
+  position: absolute;
+  left: -20px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fret-dot-color);
+  z-index: 1;
+}
+.fretDotDouble::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fret-dot-color);
+}
+.fretDotDouble::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fret-dot-color);
+}
+
+.stringLine {
+  position: relative;
+  height: 30px; /* 6 strings fit in 180px */
+  border-bottom: 2px solid var(--string-color);
+  z-index: 3;
+}
+
+.stringLine::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.fretCell {
+  position: absolute;
+  width: 40px;
+  height: 100%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.noteBubble {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--note-text);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+}
+
+.rootNote {
+  background: #ffb938 !important;
+  color: #000000 !important;
+  box-shadow: 0 0 10px rgba(255, 185, 56, 0.6) !important;
+}
+
+.blueNote {
+  background: #00ccff !important;
+  color: #000000 !important;
+  box-shadow: 0 0 10px rgba(0, 204, 255, 0.6) !important;
+}
+
+.scaleNote {
+  background: var(--note-scale-bg);
+  border: 1px solid var(--note-border);
+}
+
+.chordToneHighlight {
+  border: 2px solid #00ffcc !important;
+  box-shadow: 0 0 10px #00ffcc !important;
+}
+
+.chordToneHighlightLegend {
+  border: 2px solid #00ffcc;
+  background: var(--note-scale-bg);
+  box-shadow: 0 0 8px #00ffcc;
+}
+
+.liveDetectedNote strong {
+  color: #00c6ff;
+  text-shadow: 0 0 8px rgba(0, 198, 255, 0.4);
+}
+
+/* Pulsing highlight for the string/fret the user is playing */
+.livePlayingPulse {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #ff4b4b;
+  box-shadow: 0 0 12px #ff4b4b;
+  animation: pulse 1s infinite alternate;
+  z-index: 6;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+
+/* User Strum marker inside the sequencer step */
+.userStrumMarker {
+  position: absolute;
+  bottom: 4px;
+  font-size: 0.55rem;
+  padding: 1px 4px;
+  font-weight: 700;
+  color: #000000;
+  border-radius: 0;
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.userStrum_PERFECT {
+  background-color: #88ff5a;
+  box-shadow: 0 0 8px rgba(136, 255, 90, 0.5);
+}
+
+.userStrum_GOOD {
+  background-color: #fcff42;
+  box-shadow: 0 0 8px rgba(252, 255, 66, 0.5);
+}
+
+.userStrum_MISS {
+  background-color: #ff5e7e;
+  box-shadow: 0 0 8px rgba(255, 94, 126, 0.5);
+}
+
+.userStrum_MISS_SILENT {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-secondary);
+}
+
+/* Timing Deviation Meter Dashboard */
+.deviationMeterContainer {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.deviationMeterHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.textPerfect {
+  color: #88ff5a;
+  text-shadow: 0 0 10px rgba(136, 255, 90, 0.4);
+}
+
+.textGood {
+  color: #fcff42;
+  text-shadow: 0 0 10px rgba(252, 255, 66, 0.4);
+}
+
+.textMiss {
+  color: #ff5e7e;
+  text-shadow: 0 0 10px rgba(255, 94, 126, 0.4);
+}
+
+.deviationBar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+  margin: 10px 0;
+}
+
+.deviationZoneGood {
+  position: absolute;
+  left: 10%; /* Covers -120ms to +120ms (on a -150ms to +150ms scale) */
+  right: 10%;
+  top: 0;
+  bottom: 0;
+  background: rgba(252, 255, 66, 0.12);
+}
+
+.deviationZonePerfect {
+  position: absolute;
+  left: 30%; /* Covers -60ms to +60ms */
+  right: 30%;
+  top: 0;
+  bottom: 0;
+  background: rgba(136, 255, 90, 0.22);
+}
+
+.deviationCenterLine {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  z-index: 2;
+}
+
+.deviationPointer {
+  position: absolute;
+  width: 8px;
+  height: 18px;
+  background: #ffffff;
+  top: -4px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: left 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 3;
+}
+
+.deviationLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.calibrationTip {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 0.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid #00c6ff;
+}

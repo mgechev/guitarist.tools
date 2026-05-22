@@ -86,6 +86,14 @@ const SideNav = () => {
           <span className="material-symbols-outlined">gesture</span>
           <span className="nav-label">Legato</span>
         </NavLink>
+        <NavLink 
+          to="/blues" 
+          className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
+          title="Blues Coach"
+        >
+          <span className="material-symbols-outlined">queue_music</span>
+          <span className="nav-label">Blues Coach</span>
+        </NavLink>
       </div>
       
       <div className={styles.navFooter}>

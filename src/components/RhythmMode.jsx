@@ -13,11 +13,33 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
   const [feedback, setFeedback] = useState(''); // 'PERFECT', 'GOOD', 'MISS'
   const [feedbackKey, setFeedbackKey] = useState(0);
   
+  // Dynamic default latency calculation based on AudioContext or fallback to 80ms
+  const [latency, setLatency] = useState(() => {
+    const stored = localStorage.getItem('rhythm_latency_compensation');
+    if (stored) return parseInt(stored, 10);
+    
+    try {
+      const ctx = getSharedAudioContext();
+      const output = ctx.outputLatency || 0;
+      const base = ctx.baseLatency || 0;
+      const calculated = Math.round((output + base) * 1000);
+      return calculated > 0 ? calculated : 80;
+    } catch {
+      return 80;
+    }
+  });
+
+  const handleLatencyChange = (newLatency) => {
+    setLatency(newLatency);
+    localStorage.setItem('rhythm_latency_compensation', newLatency.toString());
+  };
+  
   const targetTimesRef = useRef([]);
   const feedbackTimeoutRef = useRef(null);
   const gridRef = useRef(null);
   const playStartTimeRef = useRef(0);
   const maxStreakRef = useRef(maxStreak);
+  const lastProcessedAttackRef = useRef(0);
 
   useEffect(() => {
     maxStreakRef.current = maxStreak;
@@ -65,6 +87,9 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
         }
       };
 
+      // Reset attack time processing tracking to ignore older attacks
+      lastProcessedAttackRef.current = activeAttackTime || 0;
+
       metronome.start();
       playStartTimeRef.current = getSharedAudioContext().currentTime + 0.05;
       setIsPlaying(true);
@@ -93,13 +118,22 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
   useEffect(() => {
     if (!activeAttackTime || !isPlaying) return;
 
+    const latencySec = latency / 1000;
+    const adjustedAttackTime = activeAttackTime - latencySec;
+
+    // Skip if we've already processed this attack timestamp or if it's older than start time
+    if (activeAttackTime <= lastProcessedAttackRef.current || adjustedAttackTime < playStartTimeRef.current) {
+      return;
+    }
+    lastProcessedAttackRef.current = activeAttackTime;
+
     const targets = targetTimesRef.current;
     let closestIdx = -1;
     let minDiff = Infinity;
 
     for (let i = 0; i < targets.length; i++) {
       if (targets[i].hit) continue;
-      const diff = Math.abs(targets[i].time - activeAttackTime);
+      const diff = Math.abs(targets[i].time - adjustedAttackTime);
       if (diff < minDiff) {
         minDiff = diff;
         closestIdx = i;
@@ -154,18 +188,20 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
         setStreak(0);
       }, 0);
     }
-  }, [activeAttackTime, isPlaying]);
+  }, [activeAttackTime, isPlaying, latency]);
 
   // Loop to catch missed notes
   useEffect(() => {
     if (!isPlaying) return;
     
+    const latencySec = latency / 1000;
+    
     const interval = setInterval(() => {
       const now = getSharedAudioContext().currentTime;
       const targets = targetTimesRef.current;
       
-      // Allow 0.12s grace period after note time to hit it
-      while (targets.length > 0 && targets[0].time < now - 0.13) {
+      // Allow 0.12s grace period after note time (plus latency compensation) to hit it
+      while (targets.length > 0 && targets[0].time < now - latencySec - 0.13) {
         const missedTarget = targets.shift();
         if (!missedTarget.hit) {
           showFeedback('MISS');
@@ -175,7 +211,7 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
     }, 50);
     
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, latency]);
 
 
   // Cleanup on unmount
@@ -301,18 +337,36 @@ const RhythmMode = ({ activeAttackTime, isGuitarConnected }) => {
         </div>
 
         <div className={styles.controls}>
-          <div className={styles.tempoSlider}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontWeight: 500 }}>
-              <span>Tempo</span>
-              <span>{tempo} BPM</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', maxWidth: '400px' }}>
+            <div className={styles.tempoSlider}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                <span>Tempo</span>
+                <span>{tempo} BPM</span>
+              </div>
+              <input 
+                type="range" 
+                min="30" 
+                max="300" 
+                value={tempo} 
+                onChange={(e) => handleTempoChange(parseInt(e.target.value))}
+              />
             </div>
-            <input 
-              type="range" 
-              min="30" 
-              max="300" 
-              value={tempo} 
-              onChange={(e) => handleTempoChange(parseInt(e.target.value))}
-            />
+
+            <div className={styles.tempoSlider}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                <span>Latency Compensation</span>
+                <span>{latency} ms</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="300" 
+                step="5"
+                value={latency} 
+                onChange={(e) => handleLatencyChange(parseInt(e.target.value))}
+                title="Compensate for hardware, OS, and interface input/output delay."
+              />
+            </div>
           </div>
 
           <Button 
