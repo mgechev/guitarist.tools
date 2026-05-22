@@ -106,3 +106,48 @@ h1, h2, h3, h4, h5, h6 {
 .fade-in { animation: fadeIn 0.3s ease forwards; }
 .reveal-animation { animation: fadeIn 0.4s ease forwards; }
 
+/* Premium sleek scrollbars for desktop viewports */
+@media (min-width: 769px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--panel-border);
+    border-radius: 4px;
+    border: 2px solid var(--bg-color);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+  }
+}
+
+/* Scrollbar and gesture optimizations for touch / mobile viewports */
+@media (max-width: 768px) {
+  /* Prevent nested and clunky native scrollbar UI on touch screens */
+  .fretboardWrapper,
+  .fretboardContainer,
+  .scrollArea,
+  [class*="fretboardWrapper"],
+  [class*="fretboardContainer"],
+  [class*="scrollArea"],
+  [class*="tabContent"] {
+    -ms-overflow-style: none !important; /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+    -webkit-overflow-scrolling: touch; /* Momentum scrolling on iOS */
+  }
+
+  .fretboardWrapper::-webkit-scrollbar,
+  .fretboardContainer::-webkit-scrollbar,
+  .scrollArea::-webkit-scrollbar,
+  [class*="fretboardWrapper"]::-webkit-scrollbar,
+  [class*="fretboardContainer"]::-webkit-scrollbar,
+  [class*="scrollArea"]::-webkit-scrollbar,
+  [class*="tabContent"]::-webkit-scrollbar {
+    display: none !important; /* Safari, Chrome, Opera */
+  }
+}
+

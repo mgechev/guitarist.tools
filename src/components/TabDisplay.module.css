@@ -112,3 +112,16 @@
   bottom: 0;
   pointer-events: none;
 }
+
+@media (max-width: 768px) {
+  .tabWrapper {
+    height: auto;
+    flex: none;
+    overflow: visible;
+  }
+  .tabContent {
+    overflow-y: visible;
+    flex: none;
+    height: auto;
+  }
+}
