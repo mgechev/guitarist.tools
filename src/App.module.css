@@ -6,7 +6,7 @@
 
 .appHeader {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1.5rem 3rem; border-bottom: 1px solid var(--panel-border);
+  padding: 1.5rem 2rem; border-bottom: 1px solid var(--panel-border);
   background: var(--bg-color); border-radius: 0;
 }
 
@@ -18,10 +18,11 @@
   background: transparent; border: none; color: var(--text-secondary);
   font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1rem;
   padding: 0.5rem 1rem; cursor: pointer; transition: all 0.3s ease;
-  border-radius: 20px; text-decoration: none;
+  border-radius: 0.25rem 0.25rem 0 0; text-decoration: none;
+  outline: none;
 }
-.tabBtn:hover { color: var(--text-primary); background: var(--surface-color); }
-.tabBtn.active { color: var(--text-primary); background: var(--surface-color); font-weight: 600; }
+.tabBtn:hover { color: var(--text-primary); background: var(--nav-hover-bg); }
+.tabBtn.active, .active { color: var(--text-primary); background: var(--nav-active-bg); border-bottom: 3px solid var(--text-primary); font-weight: 600; }
 
 .mainContent { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; min-height: 0; }
 

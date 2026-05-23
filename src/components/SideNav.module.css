@@ -13,7 +13,7 @@
   gap: 0.75rem; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.95rem; cursor: pointer; border: none; background: transparent; text-align: left;
 }
 .navItem:hover { color: var(--text-primary); background-color: var(--nav-hover-bg); border-radius: 0.25rem; }
-.navItem.active { color: var(--text-primary); background-color: var(--nav-active-bg); border-left: 3px solid var(--text-primary); border-radius: 0.25rem; }
+.navItem.active, .active { color: var(--text-primary); background-color: var(--nav-active-bg); border-left: 3px solid var(--text-primary); border-radius: 0.25rem; }
 
 .navFooter { width: 100%; border-top: 1px solid var(--panel-border); padding-top: 1rem; margin-top: auto; }
 
@@ -39,7 +39,7 @@
     border-top: 3px solid transparent;
     border-radius: 0; flex: 1 1 0%;
   }
-  .navItem.active { 
+  .navItem.active, .active { 
     border-left: none !important; 
     border-top: 3px solid var(--text-primary); 
     background-color: var(--nav-active-bg); 

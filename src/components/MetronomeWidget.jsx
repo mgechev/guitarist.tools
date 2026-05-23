@@ -11,14 +11,19 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
   const [subdivision, setSubdivision] = useState(1);
   const [visualTick, setVisualTick] = useState(null);
   const [soundType, setSoundType] = useState('synth');
+  const [activeBeat, setActiveBeat] = useState(0);
 
   const tapTimes = useRef([]);
 
   useEffect(() => {
-    metronome.onTick = (isAccent, isBeat) => {
+    metronome.onTick = (isAccent, isBeat, isSub, beatIndex) => {
       if (isAccent) setVisualTick('accent');
       else if (isBeat) setVisualTick('beat');
       else setVisualTick('sub');
+      
+      if (isBeat || isAccent) {
+        setActiveBeat(beatIndex || 0);
+      }
       
       setTimeout(() => setVisualTick(null), 100);
     };
@@ -40,13 +45,15 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
   };
 
   const handleTempoChange = (newTempo) => {
-    setTempo(newTempo);
-    metronome.setTempo(newTempo);
+    const boundedTempo = Math.max(30, Math.min(newTempo, 300));
+    setTempo(boundedTempo);
+    metronome.setTempo(boundedTempo);
   };
 
   const handleBeatsChange = (newBeats) => {
     setBeatsPerBar(newBeats);
     metronome.setBeatsPerBar(newBeats);
+    setActiveBeat(0);
   };
 
   const handleSubdivisionChange = (newSub) => {
@@ -92,22 +99,52 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
     <div className={styles.metronomeWrapper}>
       {isOpen && (
         <div className={`${styles.metronomePanel} glass-panel fade-in`}>
-          <div className={styles.metronomeHeader}>
-            <h3>Metronome</h3>
-            <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
-              <div className={`${styles.tickIndicator} ${visualTick ? styles['active' + visualTick.charAt(0).toUpperCase() + visualTick.slice(1)] : ''}`}></div>
-              <button 
-                onClick={onClose}
-                style={{background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0.25rem', display: 'flex'}}
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
+          <button 
+            onClick={onClose}
+            className={styles.closeBtn}
+            title="Close"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+
+          {/* Beat visualizer row */}
+          <div className={styles.beatIndicatorsRow}>
+            {Array.from({ length: beatsPerBar }).map((_, i) => (
+              <div 
+                key={i} 
+                className={`
+                  ${styles.beatIndicatorDot} 
+                  ${isPlaying && activeBeat === i ? styles.activeDot : ''} 
+                  ${isPlaying && activeBeat === i && visualTick === 'accent' ? styles.activeAccentDot : ''}
+                  ${i === 0 ? styles.accentDot : ''}
+                `}
+              />
+            ))}
           </div>
 
-          <div className={styles.metronomeDisplay}>
-            <span className={styles.bpmText}>{tempo}</span>
-            <span className={styles.bpmLabel}>BPM</span>
+          <div className={styles.displayContainer}>
+            <button 
+              className={styles.adjustBtn} 
+              onClick={() => handleTempoChange(tempo - 1)}
+              disabled={tempo <= 30}
+              title="Decrease Tempo"
+            >
+              <span className="material-symbols-outlined">remove</span>
+            </button>
+
+            <div className={styles.metronomeDisplay}>
+              <span className={styles.bpmText}>{tempo}</span>
+              <span className={styles.bpmLabel}>BPM</span>
+            </div>
+
+            <button 
+              className={styles.adjustBtn} 
+              onClick={() => handleTempoChange(tempo + 1)}
+              disabled={tempo >= 300}
+              title="Increase Tempo"
+            >
+              <span className="material-symbols-outlined">add</span>
+            </button>
           </div>
 
           <div className={styles.metronomeControlsInner}>
@@ -136,9 +173,7 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
                 <option value={3}>1/8 T</option>
                 <option value={4}>1/16</option>
               </Select>
-            </div>
 
-            <div className={styles.settingsRow}>
               <Select label="Sound" value={soundType} onChange={e => handleSoundTypeChange(e.target.value)}>
                 <option value="synth">Synth</option>
                 <option value="woodblock">Woodblock</option>
@@ -146,8 +181,8 @@ const MetronomeWidget = ({ isOpen, onClose }) => {
               </Select>
             </div>
 
-            <Button variant={isPlaying ? 'secondary' : 'primary'} onClick={togglePlay}>
-              <span className="material-symbols-outlined" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <Button variant={isPlaying ? 'secondary' : 'primary'} onClick={togglePlay} style={{ marginTop: '0.5rem' }}>
+              <span className="material-symbols-outlined" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem'}}>
                 {isPlaying ? 'pause' : 'play_arrow'}
               </span>
             </Button>

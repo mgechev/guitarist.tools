@@ -770,7 +770,7 @@ const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) =>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
               Practice soloing on top of the progression. 
               Roots are highlighted in the <span style={{ textDecoration: 'underline', fontWeight: 600 }}>root note theme color</span>, 
-              the Blues Note (b5) is marked with a <span style={{ color: '#3b82f6', fontWeight: 600 }}>blue border</span>, 
+              the Blues Note (b5) is marked with a <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>highlighted border</span>, 
               and chord tones for the active chord are styled as <span style={{ textDecoration: 'underline', fontWeight: 600 }}>squares</span>.
             </p>
           </div>

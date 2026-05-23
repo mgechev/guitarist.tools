@@ -56,9 +56,10 @@ class Metronome {
     if (shouldPlay) {
       if (this.onTick) {
         const timeUntilNote = time - this.audioContext.currentTime;
+        const beatNumber = Math.floor(tick / 12);
         setTimeout(() => {
           if (this.onTick) {
-            this.onTick(isAccent, isBeat, !isBeat);
+            this.onTick(isAccent, isBeat, !isBeat, beatNumber);
           }
         }, Math.max(0, timeUntilNote * 1000));
       }
