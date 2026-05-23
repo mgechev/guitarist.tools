@@ -103,6 +103,49 @@ const STRUMMING_PATTERNS = {
 
 const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) => {
   const [selectedKey, setSelectedKey] = useState('A');
+  const fretboardWrapperRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [thumbWidth, setThumbWidth] = useState(40);
+  const [isScrollable, setIsScrollable] = useState(false);
+
+  const handleScroll = () => {
+    const el = fretboardWrapperRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll > 0) {
+      setIsScrollable(true);
+      setScrollProgress((el.scrollLeft / maxScroll) * 100);
+      const ratio = el.clientWidth / el.scrollWidth;
+      const computedWidth = Math.max(40, Math.min(el.clientWidth / 3, el.clientWidth * ratio));
+      setThumbWidth(computedWidth);
+    } else {
+      setIsScrollable(false);
+    }
+  };
+
+  const handleSliderChange = (e) => {
+    const el = fretboardWrapperRef.current;
+    if (!el) return;
+    const value = parseFloat(e.target.value);
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    el.scrollLeft = (value / 100) * maxScroll;
+    setScrollProgress(value);
+  };
+
+  useEffect(() => {
+    const el = fretboardWrapperRef.current;
+    if (el) {
+      handleScroll();
+      el.addEventListener('scroll', handleScroll);
+      window.addEventListener('resize', handleScroll);
+      const timer = setTimeout(handleScroll, 100);
+      return () => {
+        el.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleScroll);
+        clearTimeout(timer);
+      };
+    }
+  }, []);
   const [rhythmPattern, setRhythmPattern] = useState('shuffle'); // 'shuffle', 'quarters', 'slow'
   const [tempo, setTempo] = useState(90);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -747,7 +790,7 @@ const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) =>
         </div>
 
         {/* Responsive Fretboard Visualizer */}
-        <div className={styles.fretboardWrapper}>
+        <div ref={fretboardWrapperRef} className={styles.fretboardWrapper}>
           <div className={styles.fretboard}>
             {/* Draw Frets (Vertical bars) */}
             {Array.from({ length: 16 }).map((_, f) => (
@@ -808,6 +851,20 @@ const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) =>
             })}
           </div>
         </div>
+        {isScrollable && (
+          <div className={styles.scrollControlContainer}>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="0.1"
+              value={scrollProgress}
+              onChange={handleSliderChange}
+              className={styles.scrollSlider}
+              style={{ '--thumb-width': `${thumbWidth}px` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Latency compensation fine tuning */}

@@ -125,14 +125,27 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Hide native scrollbars for fretboard wrapper and container on all screens */
+.fretboardWrapper,
+.fretboardContainer,
+[class*="fretboardWrapper"],
+[class*="fretboardContainer"] {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+  -webkit-overflow-scrolling: touch; /* Momentum scrolling on iOS */
+}
+
+.fretboardWrapper::-webkit-scrollbar,
+.fretboardContainer::-webkit-scrollbar,
+[class*="fretboardWrapper"]::-webkit-scrollbar,
+[class*="fretboardContainer"]::-webkit-scrollbar {
+  display: none !important; /* Safari, Chrome, Opera */
+}
+
 /* Scrollbar and gesture optimizations for touch / mobile viewports */
 @media (max-width: 768px) {
   /* Prevent nested and clunky native scrollbar UI on touch screens */
-  .fretboardWrapper,
-  .fretboardContainer,
   .scrollArea,
-  [class*="fretboardWrapper"],
-  [class*="fretboardContainer"],
   [class*="scrollArea"],
   [class*="tabContent"] {
     -ms-overflow-style: none !important; /* IE and Edge */
@@ -140,11 +153,7 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-overflow-scrolling: touch; /* Momentum scrolling on iOS */
   }
 
-  .fretboardWrapper::-webkit-scrollbar,
-  .fretboardContainer::-webkit-scrollbar,
   .scrollArea::-webkit-scrollbar,
-  [class*="fretboardWrapper"]::-webkit-scrollbar,
-  [class*="fretboardContainer"]::-webkit-scrollbar,
   [class*="scrollArea"]::-webkit-scrollbar,
   [class*="tabContent"]::-webkit-scrollbar {
     display: none !important; /* Safari, Chrome, Opera */
