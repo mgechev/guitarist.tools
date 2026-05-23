@@ -24,15 +24,15 @@
     bottom: 0;
     left: 0;
     width: 100vw;
-    height: 70px;
+    height: calc(70px + env(safe-area-inset-bottom, 0px));
     flex-direction: row;
-    padding: 0;
+    padding: 0 calc(0.75rem + env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) calc(0.75rem + env(safe-area-inset-left, 0px));
     border-right: none;
     border-top: 1px solid var(--panel-border);
     z-index: 100;
   }
   .navProfile { display: none; }
-  .navLinks { flex-direction: row; width: auto; flex: 3 1 0%; height: 100%; align-items: stretch; gap: 0; }
+  .navLinks { flex-direction: row; width: auto; flex: 5 1 0%; height: 100%; align-items: stretch; gap: 0; }
   .navItem { 
     flex-direction: column; justify-content: center; align-items: center; padding: 0; 
     font-size: 0.7rem; text-align: center; gap: 0.25rem; border-left: none !important;
