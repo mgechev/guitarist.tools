@@ -25,8 +25,7 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
   const prevRmsRef = useRef(0);
   
   const startTracking = async (overrideDeviceId, overrideDeviceLabel) => {
-    const deviceId = (overrideDeviceId && typeof overrideDeviceId === 'string') ? overrideDeviceId : selectedDeviceId;
-    if (!deviceId) return;
+    let deviceId = (overrideDeviceId && typeof overrideDeviceId === 'string') ? overrideDeviceId : selectedDeviceId;
     
     // iOS Safari requires AudioContext to be resumed synchronously inside a user gesture.
     // We must do this before awaiting the media stream!
@@ -38,26 +37,68 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
 
     try {
       let stream;
-      try {
+      if (!deviceId) {
+        // Request default audio input if no deviceId is selected/provided
         stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            deviceId: { exact: deviceId },
             echoCancellation: false,
             autoGainControl: false,
             noiseSuppression: false
           }
         });
-      } catch (exactErr) {
-        console.warn("FretMaster exact device constraint failed, falling back to ideal:", exactErr);
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            deviceId: { ideal: deviceId },
-            echoCancellation: false,
-            autoGainControl: false,
-            noiseSuppression: false
+        
+        // Populate the device list now that permission is granted
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = allDevices.filter(device => device.kind === 'audioinput');
+        setDevices(audioInputs);
+        
+        // Resolve the active device ID
+        const audioTracks = stream.getAudioTracks();
+        let activeDeviceId = '';
+        if (audioTracks.length > 0) {
+          const settings = audioTracks[0].getSettings();
+          activeDeviceId = settings.deviceId || audioInputs[0]?.deviceId || '';
+          if (activeDeviceId) {
+            deviceId = activeDeviceId;
+            setSelectedDeviceId(activeDeviceId);
+            const label = settings.label || audioInputs.find(d => d.deviceId === activeDeviceId)?.label;
+            if (label) {
+              localStorage.setItem('fretmaster_device_label', label);
+            }
           }
-        });
+        }
+        
+        if (!deviceId && audioInputs.length > 0) {
+          deviceId = audioInputs[0].deviceId;
+          setSelectedDeviceId(deviceId);
+        }
+      } else {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              deviceId: { exact: deviceId },
+              echoCancellation: false,
+              autoGainControl: false,
+              noiseSuppression: false
+            }
+          });
+        } catch (exactErr) {
+          console.warn("FretMaster exact device constraint failed, falling back to ideal:", exactErr);
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              deviceId: { ideal: deviceId },
+              echoCancellation: false,
+              autoGainControl: false,
+              noiseSuppression: false
+            }
+          });
+        }
       }
+
+      if (!stream) {
+        throw new Error('Failed to acquire stream');
+      }
+
       streamRef.current = stream;
 
       const analyserNode = audioContext.createAnalyser();
@@ -132,11 +173,14 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
       setIsTracking(true);
       if (onConnectionChange) onConnectionChange(true);
       localStorage.setItem('fretmaster_auto_connect', 'true');
-      localStorage.setItem('fretmaster_device_id', deviceId);
       
-      const label = overrideDeviceLabel || devices.find(d => d.deviceId === deviceId)?.label;
-      if (label) {
-        localStorage.setItem('fretmaster_device_label', label);
+      const finalId = deviceId || localStorage.getItem('fretmaster_device_id');
+      if (finalId) {
+        localStorage.setItem('fretmaster_device_id', finalId);
+        const label = overrideDeviceLabel || devices.find(d => d.deviceId === finalId)?.label;
+        if (label) {
+          localStorage.setItem('fretmaster_device_label', label);
+        }
       }
       
       updatePitch();
@@ -195,18 +239,39 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
 
     const getDevices = async () => {
       try {
-        const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true }); // Request permission first
-        tempStream.getTracks().forEach(track => track.stop()); // Stop the temp stream immediately to release the mic
+        const autoConnect = localStorage.getItem('fretmaster_auto_connect') === 'true';
+        const hasPreviousConnection = !!(localStorage.getItem('fretmaster_device_id') || localStorage.getItem('fretmaster_device_label'));
+        
+        let shouldRequestPermission = false;
+        
+        if (autoConnect) {
+          shouldRequestPermission = true;
+        } else if (hasPreviousConnection) {
+          // If they connected in the past, verify if permission is already granted so we don't trigger a popup
+          if (navigator.permissions && navigator.permissions.query) {
+            try {
+              const status = await navigator.permissions.query({ name: 'microphone' });
+              if (status.state === 'granted') {
+                shouldRequestPermission = true;
+              }
+            } catch {
+              // Ignore and fallback
+            }
+          }
+        }
+
+        if (shouldRequestPermission) {
+          const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          tempStream.getTracks().forEach(track => track.stop()); // Stop the temp stream immediately to release the mic
+        }
 
         const allDevices = await navigator.mediaDevices.enumerateDevices();
         const audioInputs = allDevices.filter(device => device.kind === 'audioinput');
         setDevices(audioInputs);
+        
         if (audioInputs.length > 0) {
           const storedDeviceId = localStorage.getItem('fretmaster_device_id');
           const storedDeviceLabel = localStorage.getItem('fretmaster_device_label');
-
-          console.log("FretMaster Audio Inputs available on load:", audioInputs.map(d => ({ label: d.label, deviceId: d.deviceId })));
-          console.log("FretMaster Stored Auto-Connect info:", { storedDeviceId, storedDeviceLabel });
 
           let matchedDevice = audioInputs.find(d => d.deviceId === storedDeviceId);
           if (!matchedDevice && storedDeviceLabel) {
@@ -219,10 +284,7 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
 
             const cleanStored = getCleanLabel(storedDeviceLabel);
             if (cleanStored) {
-              // 1. Try exact match of cleaned labels
               matchedDevice = audioInputs.find(d => getCleanLabel(d.label) === cleanStored);
-              
-              // 2. Try substring match of cleaned labels
               if (!matchedDevice) {
                 matchedDevice = audioInputs.find(d => {
                   const cleanLabel = getCleanLabel(d.label);
@@ -233,11 +295,11 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
           }
 
           const targetDevice = matchedDevice || audioInputs[0];
-          console.log("FretMaster Auto-Connect resolved target device:", targetDevice.label, "ID:", targetDevice.deviceId);
-          setSelectedDeviceId(targetDevice.deviceId);
+          if (targetDevice.deviceId) {
+            setSelectedDeviceId(targetDevice.deviceId);
+          }
 
-          const autoConnect = localStorage.getItem('fretmaster_auto_connect') === 'true';
-          if (autoConnect) {
+          if (autoConnect && targetDevice.deviceId) {
             startTracking(targetDevice.deviceId, targetDevice.label);
           }
         }
@@ -260,6 +322,8 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const hasPermission = devices.length > 0 && devices.some(d => d.label);
+
   if (!visible) {
     return null;
   }
@@ -272,11 +336,15 @@ const AudioInputTracker = ({ onPitchDetected, onConnectionChange, onAttackDetect
         disabled={isTracking}
         className={styles.deviceSelect}
       >
-        {devices.map(device => (
-          <option key={device.deviceId} value={device.deviceId}>
-            {device.label || `Microphone ${device.deviceId.substring(0, 5)}`}
-          </option>
-        ))}
+        {!hasPermission ? (
+          <option value="">Default Microphone</option>
+        ) : (
+          devices.map(device => (
+            <option key={device.deviceId} value={device.deviceId}>
+              {device.label || `Microphone ${device.deviceId.substring(0, 5)}`}
+            </option>
+          ))
+        )}
       </select>
       
       {!isTracking ? (

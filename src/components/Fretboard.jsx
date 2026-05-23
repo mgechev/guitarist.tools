@@ -15,6 +15,9 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
   const containerRef = useRef(null);
   const [showLeftFade, setShowLeftFade] = useState(false);
   const [showRightFade, setShowRightFade] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [thumbWidth, setThumbWidth] = useState(40);
+  const [isScrollable, setIsScrollable] = useState(false);
 
   const handleScroll = () => {
     const el = containerRef.current;
@@ -23,6 +26,26 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
     const canScrollRight = el.scrollWidth - el.clientWidth - el.scrollLeft > 10;
     setShowLeftFade(canScrollLeft);
     setShowRightFade(canScrollRight);
+
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll > 0) {
+      setIsScrollable(true);
+      setScrollProgress((el.scrollLeft / maxScroll) * 100);
+      const ratio = el.clientWidth / el.scrollWidth;
+      const computedWidth = Math.max(40, Math.min(el.clientWidth / 3, el.clientWidth * ratio));
+      setThumbWidth(computedWidth);
+    } else {
+      setIsScrollable(false);
+    }
+  };
+
+  const handleSliderChange = (e) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const value = parseFloat(e.target.value);
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    el.scrollLeft = (value / 100) * maxScroll;
+    setScrollProgress(value);
   };
 
   useEffect(() => {
@@ -126,6 +149,20 @@ const Fretboard = ({ keyIndex, isMinor, shape, showPentatonic = true, showChord 
           ))}
         </div>
       </div>
+      {isScrollable && (
+        <div className={styles.scrollControlContainer}>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="0.1"
+            value={scrollProgress}
+            onChange={handleSliderChange}
+            className={styles.scrollSlider}
+            style={{ '--thumb-width': `${thumbWidth}px` }}
+          />
+        </div>
+      )}
     </div>
   );
 };
