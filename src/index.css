@@ -169,3 +169,17 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Prevent flash of unstyled ligature text for Material Icons */
+.material-symbols-outlined {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.fonts-loaded .material-symbols-outlined {
+  visibility: visible;
+}
+
+

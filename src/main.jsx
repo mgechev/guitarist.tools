@@ -30,3 +30,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Detect when Material Symbols font is loaded to prevent FOIT/FLUT (Flash of Unstyled Text)
+if ('fonts' in document) {
+  Promise.race([
+    document.fonts.load('24px "Material Symbols Outlined"'),
+    new Promise((resolve) => setTimeout(resolve, 1500)) // Max 1.5s timeout
+  ]).then(() => {
+    document.documentElement.classList.add('fonts-loaded');
+  }).catch(() => {
+    document.documentElement.classList.add('fonts-loaded');
+  });
+} else {
+  document.documentElement.classList.add('fonts-loaded');
+}
+
+
