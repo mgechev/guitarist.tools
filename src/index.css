@@ -125,11 +125,13 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Hide native scrollbars for fretboard wrapper and container on all screens */
+/* Hide native scrollbars for fretboard wrapper, container, and sequencer container on all screens */
 .fretboardWrapper,
 .fretboardContainer,
+.sequencerContainer,
 [class*="fretboardWrapper"],
-[class*="fretboardContainer"] {
+[class*="fretboardContainer"],
+[class*="sequencerContainer"] {
   -ms-overflow-style: none !important; /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
   -webkit-overflow-scrolling: touch; /* Momentum scrolling on iOS */
@@ -137,8 +139,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .fretboardWrapper::-webkit-scrollbar,
 .fretboardContainer::-webkit-scrollbar,
+.sequencerContainer::-webkit-scrollbar,
 [class*="fretboardWrapper"]::-webkit-scrollbar,
-[class*="fretboardContainer"]::-webkit-scrollbar {
+[class*="fretboardContainer"]::-webkit-scrollbar,
+[class*="sequencerContainer"]::-webkit-scrollbar {
   display: none !important; /* Safari, Chrome, Opera */
 }
 
@@ -157,6 +161,11 @@ h1, h2, h3, h4, h5, h6 {
   [class*="scrollArea"]::-webkit-scrollbar,
   [class*="tabContent"]::-webkit-scrollbar {
     display: none !important; /* Safari, Chrome, Opera */
+  }
+
+  /* Force responsive paddings on mobile glass panels to maximize screen area and prevent content squeezing */
+  .glass-panel {
+    padding: 1rem !important;
   }
 }
 

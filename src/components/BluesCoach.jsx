@@ -560,9 +560,9 @@ const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) =>
 
       {/* 2. 12-Bar Progression Tracker */}
       <div className="glass-panel" style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <div className={styles.panelHeader} style={{ marginBottom: '1.25rem' }}>
           <h3>12-Bar Chord Progression Matrix</h3>
-          <div style={{ display: 'flex', gap: '1.5rem', color: 'var(--text-secondary)' }}>
+          <div className={styles.panelHeaderStats}>
             <div>Active Chord: <strong style={{ color: 'var(--text-primary)' }}>{activeChordName} ({activeChord})</strong></div>
             <div>Bar: <strong style={{ color: 'var(--text-primary)' }}>{isPlaying ? currentBar + 1 : '-'} / 12</strong></div>
           </div>
@@ -597,7 +597,7 @@ const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) =>
 
       {/* 3. Strum Sequencer and Real-time Verification */}
       <div className="glass-panel" style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div className={styles.panelHeader}>
           <h3>Strumming Verification Grid</h3>
           <div className={styles.accuracyMeter}>
             Accuracy: <strong style={{ color: getAccuracy() > 75 ? '#88ff5a' : getAccuracy() > 40 ? '#fcff42' : '#ff5e7e' }}>{getAccuracy()}%</strong>
@@ -764,7 +764,7 @@ const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) =>
 
       {/* 4. Blues Scale Visual Improvisation neck */}
       <div className="glass-panel" style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+        <div className={styles.panelHeader} style={{ alignItems: 'flex-start', marginBottom: '1rem' }}>
           <div>
             <h3>Blues Scale & Chord Tones Fretboard</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>

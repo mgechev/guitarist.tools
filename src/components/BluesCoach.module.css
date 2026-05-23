@@ -100,6 +100,7 @@
 
 .rhythmSelectGroup {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   width: 100%;
 }
@@ -109,11 +110,13 @@
   border: 1px solid var(--panel-border);
   color: var(--text-secondary);
   padding: 0.75rem 1rem;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 110px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
   white-space: nowrap;
+  text-align: center;
 }
 
 .rhythmBtn:hover {
@@ -777,4 +780,64 @@
 
 .scrollSlider::-moz-range-thumb:hover {
   background: var(--text-primary);
+}
+
+/* Responsive panel header and layout styling */
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+}
+
+.panelHeaderStats {
+  display: flex;
+  gap: 1.5rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .bluesCoachContainer {
+    padding: 0.5rem;
+    gap: 1.5rem;
+  }
+
+  .panelHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .panelHeaderStats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .topControlRow {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .optionBox {
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+  .rhythmBtn {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .sequencerGrid {
+    min-width: 600px; /* Force horizontal overflow to fit labels and user timing offsets */
+  }
+  
+  .sequencerContainer {
+    overflow-x: auto;
+    max-width: 100%;
+  }
 }
