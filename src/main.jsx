@@ -11,3 +11,22 @@ createRoot(document.getElementById('root')).render(
     </HashRouter>
   </StrictMode>,
 )
+
+// Register service worker for offline capability (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const basePath = window.location.pathname.endsWith('/') 
+      ? window.location.pathname 
+      : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    const swUrl = `${basePath}sw.js`;
+    
+    navigator.serviceWorker.register(swUrl)
+      .then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      })
+      .catch((error) => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}
+
