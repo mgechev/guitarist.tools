@@ -16,10 +16,9 @@
 .coachHeader h2 {
   font-size: 2.25rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  background: linear-gradient(135deg, var(--text-primary), #0072ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px rgba(0, 198, 255, 0.1);
 }
 
 .topControlRow {
@@ -553,15 +552,17 @@
 }
 
 .rootNote {
-  background: #ffb938 !important;
-  color: #000000 !important;
-  box-shadow: 0 0 10px rgba(255, 185, 56, 0.6) !important;
+  background: var(--note-root-bg) !important;
+  color: var(--bg-color) !important;
+  box-shadow: var(--pentatonic-glow) !important;
+  border: 1px solid var(--note-border) !important;
 }
 
 .blueNote {
-  background: #00ccff !important;
-  color: #000000 !important;
-  box-shadow: 0 0 10px rgba(0, 204, 255, 0.6) !important;
+  background: var(--note-scale-bg) !important;
+  color: var(--note-text) !important;
+  border: 2px solid #3b82f6 !important; /* Theme blue border */
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4) !important;
 }
 
 .scaleNote {
@@ -570,14 +571,16 @@
 }
 
 .chordToneHighlight {
-  border: 2px solid #00ffcc !important;
-  box-shadow: 0 0 10px #00ffcc !important;
+  border-radius: 0 !important;
+  border: 2px solid var(--text-primary) !important;
+  box-shadow: var(--pentatonic-glow) !important;
 }
 
 .chordToneHighlightLegend {
-  border: 2px solid #00ffcc;
+  border: 2px solid var(--text-primary);
   background: var(--note-scale-bg);
-  box-shadow: 0 0 8px #00ffcc;
+  border-radius: 0;
+  box-shadow: var(--pentatonic-glow);
 }
 
 .liveDetectedNote strong {

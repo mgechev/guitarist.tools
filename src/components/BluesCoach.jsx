@@ -769,9 +769,9 @@ const BluesCoach = ({ activePitchData, activeAttackTime, isGuitarConnected }) =>
             <h3>Blues Scale & Chord Tones Fretboard</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
               Practice soloing on top of the progression. 
-              Roots are <span style={{ color: '#ffb938', fontWeight: 600 }}>gold</span>, 
-              the Blues Note (b5) is <span style={{ color: '#00ccff', fontWeight: 600 }}>blue</span>, 
-              and chord tones for the active chord <span style={{ textDecoration: 'underline' }}>glow neon cyan</span>.
+              Roots are highlighted in the <span style={{ textDecoration: 'underline', fontWeight: 600 }}>root note theme color</span>, 
+              the Blues Note (b5) is marked with a <span style={{ color: '#3b82f6', fontWeight: 600 }}>blue border</span>, 
+              and chord tones for the active chord are styled as <span style={{ textDecoration: 'underline', fontWeight: 600 }}>squares</span>.
             </p>
           </div>
           {isGuitarConnected && activePitchData && (
